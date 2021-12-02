@@ -145,7 +145,7 @@ anova(ancova.word)
 library(wordcloud)
 #male
 male.perm <- data.frame() #initialize
-  graph.m = grapher("male/characters", 100, token_filter2("noun", 1940, 2010, token.all)) #extract graph info
+  graph.m = grapher("male/characters", 25, token_filter2("noun", 1940, 2010, token.all)) #extract graph info
   gr.m <- graph.m[[3]] #pass graph object
   gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
   gr.m <- gr.m[1:20,] #filter 20 
@@ -171,13 +171,21 @@ male.perm <- data.frame() #initialize
   graphm = graph.m[[1]]
   vism <- toVisNetworkData(graphm)
   nodes <- vism$nodes
+  nodes <- nodes %>% select(-color)
   edges <- vism$edges
   graphm = simplify(graphm)
   vism_comm <- cluster_fast_greedy(graphm)
   membership(vism_comm)
-  vism_comm[[10]]
+  modularity(vism_comm)
+  'marriage/noun' %in% vism_comm[[8]]
+  vism_comm[[8]]
   plot(vism_comm, graphm, vertex.size = 2, vertex.label = NA)
-  
+  nodes$group <- membership(vism_comm) 
+  #filter male and female
+  #
+  vis_graph <- visNetwork(nodes, edges, width = 1600, height = 900) %>% visPhysics(enabled = FALSE) %>% 
+    visNodes(size = 8, font = c(size = 8)) %>% visEdges(color = c(opacity = 0.2)) 
+  vis_graph
   
   nodes$group <- membership(vism_comm) 
   #filter male and female
@@ -186,6 +194,8 @@ male.perm <- data.frame() #initialize
     visNodes(size = 8, font = c(size = 8)) %>% visEdges(color = c(opacity = 0.4))
   vis_graph
 #female - same as above
+  #save to pdf
+  
   
   female.perm <- data.frame()
   graph.f = grapher("female/characters", 12 ,token_filter2("noun", 1940, 2010, token.all))

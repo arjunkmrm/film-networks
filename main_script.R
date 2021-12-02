@@ -144,8 +144,8 @@ anova(ancova.word)
 #3. bar plot, networks, word cloud - log likelihoods
 library(wordcloud)
 #male
-male.perm <- data.frame() #initialise
-  graph.m = grapher("male/characters", 12 ,token_filter2("noun", 1940, 2010, token.all)) #extract graph info
+male.perm <- data.frame() #initialize
+  graph.m = grapher("male/characters", 100, token_filter2("noun", 1940, 2010, token.all)) #extract graph info
   gr.m <- graph.m[[3]] #pass graph object
   gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
   gr.m <- gr.m[1:20,] #filter 20 
@@ -164,7 +164,27 @@ male.perm <- data.frame() #initialise
   
   #network
   visIgraph(graph.m[[1]]) %>% visNodes(font = list(size = 28))
+  #graphm_df = as_data_frame(graph.m[[1]])
+  #head(graphm_df)
   
+  #communities
+  graphm = graph.m[[1]]
+  vism <- toVisNetworkData(graphm)
+  nodes <- vism$nodes
+  edges <- vism$edges
+  graphm = simplify(graphm)
+  vism_comm <- cluster_fast_greedy(graphm)
+  membership(vism_comm)
+  vism_comm[[10]]
+  plot(vism_comm, graphm, vertex.size = 2, vertex.label = NA)
+  
+  
+  nodes$group <- membership(vism_comm) 
+  #filter male and female
+  # no physics
+  vis_graph <- visNetwork(nodes, edges, width = 1600, height = 900) %>% visPhysics(enabled = FALSE) %>% 
+    visNodes(size = 8, font = c(size = 8)) %>% visEdges(color = c(opacity = 0.4))
+  vis_graph
 #female - same as above
   
   female.perm <- data.frame()

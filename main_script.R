@@ -1,4 +1,4 @@
-#everything related to statistical calculationsof networks
+#everything related to statistical calculations of networks
 #and plots
 
 #remember to set directory to 'data_function scripts' folder

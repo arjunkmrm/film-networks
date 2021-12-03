@@ -12,13 +12,15 @@ toks.female <- toks.spacy %>%
   tokens_remove("")
 
 male_fcmat = fcm(toks.male, context = c("window"),
-                 count = c("boolean"),
-                 window = 5)
+                 count = c("weighted"),
+                 window = 10)
 male_fcmat
+class(male_fcmat)
 graph_m = graph_from_adjacency_matrix(male_fcmat, mode = "undirected")
 graph_m = simplify(graph_m)
-graph_m.comm <- cluster_fast_greedy(graph_m)
+graph_m.comm <- walktrap.community(graph_m)
 membership(graph_m.comm)
+length(graph_m.comm)
 #plot(graph_m, vertex.size = 2, vertex.label = NA)
 
 minimumFrequency = 10

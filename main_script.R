@@ -145,7 +145,7 @@ anova(ancova.word)
 library(wordcloud)
 #male
 male.perm <- data.frame() #initialize
-  graph.m = grapher("male/characters", 25, token_filter2("all", 1940, 2010, token.all)) #extract graph info
+  graph.m = grapher("male/characters", 50, token_filter2("all", 1940, 2010, token.all)) #extract graph info
   gr.m <- graph.m[[3]] #pass graph object
   gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
   gr.m <- gr.m[1:20,] #filter 20 
@@ -175,7 +175,7 @@ male.perm <- data.frame() #initialize
   nodes <- nodes %>% select(-color) #remove color nodes
   edges <- vism$edges #store edges
   graphm = simplify(graphm, remove.loops = TRUE) #remove loops
-  vism_comm <- cluster_fast_greedy(graphm) #find clusters using igraph
+  vism_comm <- walktrap.community(graphm) #find clusters using igraph
   modularity(vism_comm) #modularity
   #vism_comm
   length(vism_comm)
@@ -186,8 +186,8 @@ male.perm <- data.frame() #initialize
     visNodes(size = 8, font = c(size = 8)) %>% visEdges(color = c(opacity = 0.4))
   vism_graph
   visSave(vism_graph, "male_graph.html", selfcontained = TRUE, background = "white")
-  graphm
-  degree(graphm)
+  vism_comm[[1]]
+  degree(graphm)['help/noun']
   
   #female
   female.perm <- data.frame()

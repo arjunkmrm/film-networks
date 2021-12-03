@@ -1,4 +1,4 @@
-Read Me
+#Film Networks
 
 - The main aim of this project was to identify how gender stereotypes have changed from a network perspective. For interactive shiny implementation, go to: https://arjunkmr.shinyapps.io/film_networks/
 

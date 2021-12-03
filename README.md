@@ -7,3 +7,7 @@
 - 'exporatory_plots.R' contains the code for the exploratory analysis for the dataset and also the plots
 
 - The 'create_process data' folder contains scripts related data scraping and pre-processing
+
+- 'community_detection.R' is the script used to analyse community structures in the male and female networks
+
+

@@ -6,4 +6,4 @@
 
 - 'exporatory_plots.R' contains the code for the exploratory analysis for the dataset and also the plots
 
-- The 'create_process data' folder contains scripts related to how the data was scraped and cleaned
+- The 'create_process data' folder contains scripts related data scraping and pre-processing

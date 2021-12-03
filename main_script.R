@@ -145,7 +145,7 @@ anova(ancova.word)
 library(wordcloud)
 #male
 male.perm <- data.frame() #initialize
-  graph.m = grapher("male/characters", 25, token_filter2("noun", 1940, 2010, token.all)) #extract graph info
+  graph.m = grapher("male/characters", 25, token_filter2("all", 1940, 2010, token.all)) #extract graph info
   gr.m <- graph.m[[3]] #pass graph object
   gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
   gr.m <- gr.m[1:20,] #filter 20 
@@ -167,46 +167,36 @@ male.perm <- data.frame() #initialize
   #graphm_df = as_data_frame(graph.m[[1]])
   #head(graphm_df)
   
-  #communities
-  graphm = graph.m[[1]]
-  vism <- toVisNetworkData(graphm)
-  nodes <- vism$nodes
-  nodes <- nodes %>% select(-color)
-  edges <- vism$edges
-  graphm = simplify(graphm)
-  vism_comm <- cluster_fast_greedy(graphm)
-  membership(vism_comm)
-  modularity(vism_comm)
-  'marriage/noun' %in% vism_comm[[8]]
-  vism_comm[[8]]
-  plot(vism_comm, graphm, vertex.size = 2, vertex.label = NA)
-  nodes$group <- membership(vism_comm) 
-  #filter male and female
-  #
-  vis_graph <- visNetwork(nodes, edges, width = 1600, height = 900) %>% visPhysics(enabled = FALSE) %>% 
-    visNodes(size = 8, font = c(size = 8)) %>% visEdges(color = c(opacity = 0.2)) 
-  vis_graph
-  
-  nodes$group <- membership(vism_comm) 
-  #filter male and female
-  # no physics
-  vis_graph <- visNetwork(nodes, edges, width = 1600, height = 900) %>% visPhysics(enabled = FALSE) %>% 
+  #community structure
+  #male
+  graphm = graph.m[[1]] #store graph object
+  vism <- toVisNetworkData(graphm) #create visnetwork object
+  nodes <- vism$nodes #store nodes
+  nodes <- nodes %>% select(-color) #remove color nodes
+  edges <- vism$edges #store edges
+  graphm = simplify(graphm, remove.loops = TRUE) #remove loops
+  vism_comm <- cluster_fast_greedy(graphm) #find clusters using igraph
+  modularity(vism_comm) #modularity
+  #vism_comm
+  length(vism_comm)
+   plot(vism_comm, graphm, vertex.size = 4, vertex.label = NA)
+  nodes$group <- membership(vism_comm) #store group info
+  #no physics
+  vism_graph <- visNetwork(nodes, edges, width = 1600, height = 900) %>% visPhysics(enabled = FALSE) %>% 
     visNodes(size = 8, font = c(size = 8)) %>% visEdges(color = c(opacity = 0.4))
-  vis_graph
-#female - same as above
-  #save to pdf
+  vism_graph
+  visSave(vism_graph, "male_graph.html", selfcontained = TRUE, background = "white")
+  graphm
+  degree(graphm)
   
-  
+  #female
   female.perm <- data.frame()
-  graph.f = grapher("female/characters", 12 ,token_filter2("noun", 1940, 2010, token.all))
+  graph.f = grapher("female/characters", 25, token_filter2("all", 1940, 2010, token.all))
   gr.f <- graph.f[[3]]
   gr.f <- gr.f[gr.f$names != "male/characters",]
   gr.f <- gr.f[1:20,]
   gr.f$rank = 1 : nrow(gr.f)
   gr.f$gender = "female"
-  
-  #network
-  visIgraph(graph.f[[1]]) %>% visNodes(font = list(size = 28))
   
   #bar plot
   ggplot(gr.f[1:20,], aes(reorder(names, -loglik), loglik)) +
@@ -218,6 +208,23 @@ male.perm <- data.frame() #initialize
   #word cloud
   wordcloud(gr.f$names, as.integer(gr.f$loglik), rot.per = 0, colors = brewer.pal(4, "RdYlBu"))
  
-
+  #community structure
+  graphf = graph.f[[1]] #store graph object
+  visf <- toVisNetworkData(graphf) #create visnetwork object
+  nodes <- visf$nodes #store nodes
+  nodes <- nodes %>% select(-color) #remove color nodes
+  edges <- visf$edges #store edges
+  graphf = simplify(graphf, remove.loops = TRUE) #remove loops
+  visf_comm <- cluster_fast_greedy(graphf) #find clusters using igraph
+  modularity(visf_comm) #modularity
+  visf_comm
+  length(visf_comm)
+  nodes$group <- membership(visf_comm) #store group info
+  #no physics
+  visf_graph <- visNetwork(nodes, edges, width = 1600, height = 900) %>% visPhysics(enabled = FALSE) %>% 
+    visNodes(size = 8, font = c(size = 8)) %>% visEdges(color = c(opacity = 0.4))
+  visf_graph
+  visSave(visf_graph, "female_graph.html", selfcontained = TRUE, background = "white")
   
+  graphf
   

@@ -2,7 +2,7 @@
 #each token filter has a slight difference - please read through code
 #annotation to note key difference
 
-#main token filter - filter for particular decade
+#main token filter - filter for particular decade and particular pos
 token_filter <- function(pos = "adj", year = 1940, toks.filter){
   rm = c("*/noun", "*/adj", "*/verb")
   pos.temp <- paste("*/", tolower(pos), sep = "")
@@ -29,9 +29,9 @@ token_filter2 <- function(pos = "noun", year_start = 1940, year_end = 1960, toks
       tokens_remove(pattern = rm)
   }
   toks.filter <- toks.filter %>% tokens_subset(decade >= year_start) %>% tokens_subset(decade < year_end) 
-  
+}
 
-#token filter 3 - filter across decade range, filter only given pos
+#token filter 3 - filter across decade range, filter to have only given pos
 token_filter3 <- function(pos = "adj", year_start = 1940, year_end = 1960, toks.filter){
   rm = c("*/noun", "*/adj", "*/verb")
   pos.temp <- paste("*/", tolower(pos), sep = "")
@@ -44,9 +44,5 @@ token_filter3 <- function(pos = "adj", year_start = 1940, year_end = 1960, toks.
   toks.filter <- toks.filter %>% tokens_subset(decade >= year_start) %>% tokens_subset(decade < year_end) 
   return(toks.filter)
 }
-
 ###############
 
-
- return(toks.filter)
-}

@@ -12,7 +12,7 @@ toks.female <- toks.spacy %>%
   tokens_remove("")
 
 male_fcmat = fcm(toks.male, context = c("window"),
-                 count = c("weighted"),
+                 count = c("boolean"),
                  window = 5)
 male_fcmat
 graph_m = graph_from_adjacency_matrix(male_fcmat, mode = "undirected")
@@ -21,7 +21,7 @@ graph_m.comm <- cluster_fast_greedy(graph_m)
 membership(graph_m.comm)
 #plot(graph_m, vertex.size = 2, vertex.label = NA)
 
-minimumFrequency = 50 
+minimumFrequency = 10
 binDTM <- toks.male %>% 
   dfm() %>% 
   dfm_trim(min_docfreq = minimumFrequency) %>% 
@@ -38,6 +38,7 @@ plot.igraph(film_graph, vertex.color=membership(c1), vertex.label = NA, vertex.s
 length(c1)
 sizes(c1)
 c1
-head((c1[[4]]))
+head((c1[[3]]))
+
 
      

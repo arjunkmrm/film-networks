@@ -70,7 +70,7 @@ knitr::kable(communities %>%
                dplyr::select(community, n_characters, most_important))
 
 #top five in each community
-top_five <- data.frame()
+top_twenty <- data.frame()
 
 for (i in unique(male_graph$community)) {
   # create subgraphs for each community
@@ -87,11 +87,11 @@ for (i in unique(male_graph$community)) {
     result <- data.frame(community = NULL, rank = NULL, character = NULL)
   }
   
-  top_five <- top_five %>% 
+  top_twenty <- top_twenty %>% 
     dplyr::bind_rows(result)
 }
 
-top_five
+top_twenty
 
 knitr::kable(
   top_five %>% 
@@ -99,11 +99,39 @@ knitr::kable(
 )
 
 #Visualising the communities
+male_subgraph <- induced_subgraph(male_graph, v = top_twenty$character)
+male_subgraph <- simplify(male_subgraph)
+male_subgraph$community <- top_twenty$community
+unique(male_subgraph$community)
 
+# give our nodes some properties, incl scaling them by degree and coloring them by community
+V(male_subgraph)$size <- 3
+V(male_subgraph)$frame.color <- "white"
+V(male_subgraph)$color <- male_subgraph$community
+V(male_subgraph)$label <- V(male_subgraph)$name
+V(male_subgraph)$label.cex <- 1.2
 
+# also color edges according to their starting node
+edge.start <- ends(male_subgraph, es = E(male_subgraph), names = F)[,1]
+E(male_subgraph)$color <- V(male_subgraph)$color[edge.start]
+E(male_subgraph)$arrow.mode <- 0
 
+# only label central characters
+#v_labels <- which(V(friends_graph)$name %in% friends)
 
+#for (i in 1:length(V(friends_graph))) {
+#  if (!(i %in% v_labels)) {
+#    V(friends_graph)$label[i] <- ""
+#  }
+#}
 
+l2 <- layout_with_mds(male_subgraph)
+plot(male_subgraph, rescale = T, layout = l2, main = "Male Graph")
+length(V(male_subgraph))
+
+male_subgraph$community
+V(male_subgraph)
+#match results
 
 ##### old ######
 
@@ -124,6 +152,11 @@ member.m = rep(1:3, each = 20)
 clusters.m = make_clusters(subgraph.m, membership = member.m, modularity = TRUE)
 #layout <-layout.fruchterman.reingold(graph_m)
 plot(induced_subgraph(graph_m, male.c), vertex.colors = clusters.m$membership, vertex.size = 4, vertex.label = NA)
+
+
+visIgraph(male_subgraph)
+
+
 
 ##### old ########
 

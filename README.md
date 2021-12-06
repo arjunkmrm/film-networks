@@ -1,6 +1,6 @@
 # Film Networks
 
-- The main aim of this project was to identify how gender stereotypes have changed from a network perspective. For interactive shiny implementation, go to: https://arjunkmr.shinyapps.io/film_networks/
+- The main aim of this project was to identify how gender stereotypes have changed across decades using a network perspective. For interactive shiny implementation, go to: https://arjunkmr.shinyapps.io/film_networks/
 
 - 'main_script.R' contains all the code for all the statistical calculations and plots in the paper with respect to the network analysis. 
 

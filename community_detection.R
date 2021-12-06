@@ -2,6 +2,13 @@
 #remember to set working directory to 'data_function scripts' folder
 library(tidyverse)
 library(quanteda)
+library(igraph) #for creating graphs
+library(visNetwork) #for visualizing graphs
+
+#load tokens, get it ready for analysis
+load("token.all.RData")
+#convert tokens to all lower
+token.all <- tokens_tolower(token.all) #convert all tokens to lower
 
 #select window of words around males and female characters
 #males
@@ -27,20 +34,100 @@ male_fcmat = fcm(toks.male, context = c("window"),
 
 male_fcmat[1:2,1:2] #a small portion of the feature co-occurrence matrix
 
-graph_m = graph_from_adjacency_matrix(male_fcmat, mode = "undirected") #create graph from matrix
-graph_m = simplify(graph_m, remove.loops = TRUE) #remove self-looping edges
-graph_m.comm <- cluster_fast_greedy(graph_m) #detect communities
-#membership(graph_m.comm)
-length(graph_m.comm) #number of communities - note that there are many small communities but only few major ones
-sizes(graph_m.comm) #sizes of communities
+male_graph = graph_from_adjacency_matrix(male_fcmat, weighted = TRUE) #create graph from matrix
+edgelist_male <- get.data.frame(male_graph)
+edgelist_mm <- as.matrix(edgelist_male[ ,c("from", "to")])
+
+male_graph <- graph_from_edgelist(edgelist_mm, directed = FALSE) 
+male_graph <- set.edge.attribute(male_graph, "weight", value = edgelist_male$weight)
+graph_m = simplify(male_graph, remove.loops = TRUE) #remove self-looping edges
+
+#louvian communities
+louvain_male <- cluster_louvain(male_graph, weights = E(male_graph)$weights)#detect communities
+male_graph$community <- louvain_male$membership
+unique(male_graph$community)
+
+#most important word in each community
+communities <- data.frame()
+
+for (i in unique(male_graph$community)) {
+  # create subgraphs for each community
+  subgraph <- induced_subgraph(male_graph, v = which(male_graph$community == i))
+  # get size of each subgraph
+  size <- igraph::gorder(subgraph)
+  # get betweenness centrality
+  btwn <-  igraph::betweenness(subgraph)
+  communities <- communities %>% 
+    dplyr::bind_rows(
+      data.frame(community = i,
+                 n_characters = size,
+                 most_important = names(which(btwn == max(btwn)))
+      )
+    )
+}
+
+knitr::kable(communities %>% 
+               dplyr::select(community, n_characters, most_important))
+
+#top five in each community
+top_five <- data.frame()
+
+for (i in unique(male_graph$community)) {
+  # create subgraphs for each community
+  subgraph <- induced_subgraph(male_graph, v = which(male_graph$community == i))
+  
+  # for larger communities
+  if (igraph::gorder(subgraph) > 1000) {
+    # get degree
+    degree <-  igraph::degree(subgraph)
+    # get top ten degrees
+    top <- names(head(sort(degree, decreasing = TRUE), 10))
+    result <- data.frame(community = i, rank = 1:10, character = top)
+  } else {
+    result <- data.frame(community = NULL, rank = NULL, character = NULL)
+  }
+  
+  top_five <- top_five %>% 
+    dplyr::bind_rows(result)
+}
+
+top_five
+
+knitr::kable(
+  top_five %>% 
+    tidyr::pivot_wider(names_from = rank, values_from = character)
+)
+
+#Visualising the communities
+
+
+
+
+
+
+##### old ######
 
 #nodes with highest degrees in each of the major communities
 #community 1 - relationships?
 head(sort(degree(graph_m)[graph_m.comm[[1]]], decreasing = TRUE), 20)
+c1 = names(head(sort(degree(graph_m)[graph_m.comm[[1]]], decreasing = TRUE), 20))
 #community 2 - action?
 head(sort(degree(graph_m)[graph_m.comm[[2]]], decreasing = TRUE), 20)
+c2 = names(head(sort(degree(graph_m)[graph_m.comm[[2]]], decreasing = TRUE), 20))
 #community 3 - violence?
 head(sort(degree(graph_m)[graph_m.comm[[3]]], decreasing = TRUE), 20)
+c3 = names(head(sort(degree(graph_m)[graph_m.comm[[3]]], decreasing = TRUE), 20))
+
+male.c = c(c1, c2, c3)
+subgraph.m = induced_subgraph(graph_m, male.c)
+member.m = rep(1:3, each = 20)
+clusters.m = make_clusters(subgraph.m, membership = member.m, modularity = TRUE)
+#layout <-layout.fruchterman.reingold(graph_m)
+plot(induced_subgraph(graph_m, male.c), vertex.colors = clusters.m$membership, vertex.size = 4, vertex.label = NA)
+
+##### old ########
+
+
 
 #DETECTING COMMUNITIES IN FEMALE NETWORKS
 #filter to keep only words that occur at least 10 times

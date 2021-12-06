@@ -24,60 +24,60 @@ toks.female <- token.all %>%
 
 detect_communities <- function(toks){
 #filter to keep only words that occur at least 10 times
-dfm_male <-  toks.male %>% dfm() %>% dfm_trim(min_termfreq = 10)
-male_filtered = colnames(dfm_male)
-toks.male <- token.all %>% 
-  tokens_select(pattern = male_filtered, selection = 'keep', padding = TRUE)
+dfm <-  toks %>% dfm() %>% dfm_trim(min_termfreq = 10)
+filtered = colnames(male)
+toks <- token.all %>% 
+  tokens_select(pattern = filtered, selection = 'keep', padding = TRUE)
 
 #feature co-occurrence matrix for males
-male_fcmat = fcm(toks.male, context = c("window"),
+fcmat = fcm(toks, context = c("window"),
                  count = c("weighted"), #words are weighted within the window
                  window = 5)
 
-male_fcmat[1:2,1:2] #a small portion of the feature co-occurrence matrix
+#fcmat[1:2,1:2] #a small portion of the feature co-occurrence matrix
 
-male_graph = graph_from_adjacency_matrix(male_fcmat, weighted = TRUE) #create graph from matrix
-edgelist_male <- get.data.frame(male_graph)
-edgelist_mm <- as.matrix(edgelist_male[ ,c("from", "to")])
+graph = graph_from_adjacency_matrix(fcmat, weighted = TRUE) #create graph from matrix
+edgelist <- get.data.frame(graph)
+edgelist_m <- as.matrix(edgelist[ ,c("from", "to")])
 
-male_graph <- graph_from_edgelist(edgelist_mm, directed = FALSE) 
-male_graph <- set.edge.attribute(male_graph, "weight", value = edgelist_male$weight)
-graph_m = simplify(male_graph, remove.loops = TRUE) #remove self-looping edges
+graph <- graph_from_edgelist(edgelist_m, directed = FALSE) 
+graph <- set.edge.attribute(graph, "weight", value = edgelist$weight)
+graph = simplify(graph, remove.loops = TRUE) #remove self-looping edges
 
 #louvian communities
-louvain_male <- cluster_louvain(male_graph, weights = E(male_graph)$weights)#detect communities
-male_graph$community <- louvain_male$membership
-unique(male_graph$community)
-modularity(louvain_male)
+louvain <- cluster_louvain(graph, weights = E(graph)$weights)#detect communities
+graph$community <- louvain$membership
+#unique(male_graph$community)
+print('modularity ', modularity(louvain))
 
-#most important word in each community
-communities <- data.frame()
-
-for (i in unique(male_graph$community)) {
-  # create subgraphs for each community
-  subgraph <- induced_subgraph(male_graph, v = which(male_graph$community == i))
-  # get size of each subgraph
-  size <- igraph::gorder(subgraph)
-  # get betweenness centrality
-  btwn <-  igraph::betweenness(subgraph)
-  communities <- communities %>% 
-    dplyr::bind_rows(
-      data.frame(community = i,
-                 n_characters = size,
-                 most_important = names(which(btwn == max(btwn)))
-      )
-    )
-}
-
-knitr::kable(communities %>% 
-               dplyr::select(community, n_characters, most_important))
+# #most important word in each community
+# communities <- data.frame()
+# 
+# for (i in unique(male_graph$community)) {
+#   # create subgraphs for each community
+#   subgraph <- induced_subgraph(male_graph, v = which(male_graph$community == i))
+#   # get size of each subgraph
+#   size <- igraph::gorder(subgraph)
+#   # get betweenness centrality
+#   btwn <-  igraph::betweenness(subgraph)
+#   communities <- communities %>% 
+#     dplyr::bind_rows(
+#       data.frame(community = i,
+#                  n_characters = size,
+#                  most_important = names(which(btwn == max(btwn)))
+#       )
+#     )
+# }
+# 
+# knitr::kable(communities %>% 
+#                dplyr::select(community, n_characters, most_important))
 
 #top five in each community
-top_twenty <- data.frame()
+top_ten <- data.frame()
 
-for (i in unique(male_graph$community)) {
+for (i in unique(graph$community)) {
   # create subgraphs for each community
-  subgraph <- induced_subgraph(male_graph, v = which(male_graph$community == i))
+  subgraph <- induced_subgraph(graph, v = which(graph$community == i))
   
   # for larger communities
   if (igraph::gorder(subgraph) > 1000) {
@@ -90,41 +90,39 @@ for (i in unique(male_graph$community)) {
     result <- data.frame(community = NULL, rank = NULL, character = NULL)
   }
   
-  top_twenty <- top_twenty %>% 
+  top_ten <- top_ten %>% 
     dplyr::bind_rows(result)
 }
 
-top_twenty
+#top_ten
 
-knitr::kable(
-  top_five %>% 
-    tidyr::pivot_wider(names_from = rank, values_from = character)
-)
-
-
+# knitr::kable(
+#   top_five %>% 
+#     tidyr::pivot_wider(names_from = rank, values_from = character)
+# )
 
 #Visualising the communities
-male_subgraph <- induced_subgraph(male_graph, v = top_twenty$character)
-male_subgraph <- simplify(male_subgraph)
-male_subgraph$community
-m_nodes = data.frame(character = names(V(male_subgraph)))
+subgraph <- induced_subgraph(graph, v = top_ten$character)
+subgraph <- simplify(subgraph)
+subgraph$community
+nodes = data.frame(character = names(V(subgraph)))
 group = rep(1:5, each = 10)
-top_twenty$group = group
-male_clusters = inner_join(m_nodes, top_twenty)
-male_subgraph$community <- male_clusters$group
-unique(male_subgraph$community)
+top_ten$group = group
+clusters = inner_join(nodes, top_ten)
+subgraph$community <- clusters$group
+#unique(subgraph$community)
 
 # give our nodes some properties, incl scaling them by degree and coloring them by community
-V(male_subgraph)$size <- 5
-V(male_subgraph)$frame.color <- "white"
-V(male_subgraph)$color <- male_subgraph$community
+V(subgraph)$size <- 5
+V(subgraph)$frame.color <- "white"
+V(subgraph)$color <- subgraph$community
 #V(male_subgraph)$label <- V(male_subgraph)$name
-V(male_subgraph)$label.cex <- 1.5
+V(subgraph)$label.cex <- 1.5
 
 # also color edges according to their starting node
-edge.start <- ends(male_subgraph, es = E(male_subgraph), names = F)[,1]
-E(male_subgraph)$color <- V(male_subgraph)$color[edge.start]
-E(male_subgraph)$arrow.mode <- 0
+edge.start <- ends(subgraph, es = E(subgraph), names = F)[,1]
+E(subgraph)$color <- V(subgraph)$color[edge.start]
+E(subgraph)$arrow.mode <- 0
 
 # only label central characters
 #v_labels <- which(V(friends_graph)$name %in% friends)
@@ -137,26 +135,26 @@ E(male_subgraph)$arrow.mode <- 0
 
 
 
-l2 <- layout_with_mds(male_subgraph)
-layout <- layout_with_kk(male_subgraph, weights=weights)
+#l2 <- layout_with_mds(male_subgraph)
+#layout <- layout_with_kk(male_subgraph, weights=weights)
 #plot(graph, layout=layout)
-plot(male_subgraph, rescale = T, layout = l2, main = "Male Graph")
-length(V(male_subgraph))
+#plot(male_subgraph, rescale = T, layout = l2, main = "Male Graph")
+#length(V(male_subgraph))
 
-visIgraph(male_subgraph) %>% visIgraphLayout(layout = "layout_with_mds") %>% visNodes(size = 12)
+#visIgraph(male_subgraph) %>% visIgraphLayout(layout = "layout_with_mds") %>% visNodes(size = 12)
 #layout_in_circle
 #"layout_with_mds"
 
 #plot by groups
 #make clusters first
-male_clust = make_clusters(male_subgraph, membership = male_clusters$group)
+clust_obj = make_clusters(subgraph, membership = clusters$group)
 
 # weights <- ifelse(crossing(male_clust, male_subgraph), 1, 100)
 # layout <- layout_with_kk(male_subgraph, weights=weights)
 # plot(male_subgraph, layout=layout)
 
 prettyColors <- c("turquoise4", "azure4", "olivedrab","deeppink4", "blue")
-communityColors <- prettyColors[membership(male_clust)]
+communityColors <- prettyColors[membership(clust_obj)]
 
 
 edge.weights <- function(community, network, weight.within = 100, weight.between = 1) {
@@ -164,62 +162,59 @@ edge.weights <- function(community, network, weight.within = 100, weight.between
   weights <- ifelse(test = bridges, yes = weight.between, no = weight.within)
   return(weights) 
 }
-E(male_subgraph)$weight <- edge.weights(male_clust, male_subgraph)
-layout <- layout_with_fr(male_subgraph, weights=E(male_subgraph)$weight)
-plot(male_subgraph, layout=layout, col = communityColors)
+E(subgraph)$weight <- edge.weights(clust_obj, subgraph)
+layout <- layout_with_fr(subgraph, weights=E(subgraph)$weight)
+plot(subgraph, layout=layout, col = communityColors)
 }
 
 #visIgraph(male_subgraph) %>% visIgraphLayout(layout = "layout_with_fr") %>% visNodes(size = 12)
 
-##### old ########
-
-##### old ######
-
-#nodes with highest degrees in each of the major communities
-#community 1 - relationships?
-head(sort(degree(graph_m)[graph_m.comm[[1]]], decreasing = TRUE), 20)
-c1 = names(head(sort(degree(graph_m)[graph_m.comm[[1]]], decreasing = TRUE), 20))
-#community 2 - action?
-head(sort(degree(graph_m)[graph_m.comm[[2]]], decreasing = TRUE), 20)
-c2 = names(head(sort(degree(graph_m)[graph_m.comm[[2]]], decreasing = TRUE), 20))
-#community 3 - violence?
-head(sort(degree(graph_m)[graph_m.comm[[3]]], decreasing = TRUE), 20)
-c3 = names(head(sort(degree(graph_m)[graph_m.comm[[3]]], decreasing = TRUE), 20))
-
-male.c = c(c1, c2, c3)
-subgraph.m = induced_subgraph(graph_m, male.c)
-member.m = rep(1:3, each = 20)
-clusters.m = make_clusters(subgraph.m, membership = member.m, modularity = TRUE)
-#layout <-layout.fruchterman.reingold(graph_m)
-plot(induced_subgraph(graph_m, male.c), vertex.colors = clusters.m$membership, vertex.size = 4, vertex.label = NA)
-
-#DETECTING COMMUNITIES IN FEMALE NETWORKS
-#filter to keep only words that occur at least 10 times
-dfm_female <-  toks.female %>% dfm() %>% dfm_trim(min_termfreq = 10)
-female_filtered = colnames(dfm_female)
-toks.female <- token.all %>% 
-  tokens_select(pattern = female_filtered, selection = 'keep', padding = TRUE)
-#feature co-occurrence matrix for females
-female_fcmat = fcm(toks.female, context = c("window"),
-                 count = c("weighted"), #words are weighted within the window
-                 window = 5)
-
-female_fcmat[1:2,1:2] #a small portion of the feature co-occurrence matrix
-
-graph_f = graph_from_adjacency_matrix(female_fcmat, mode = "undirected") #create graph from matrix
-graph_f = simplify(graph_m, remove.loops = TRUE) #remove self-looping edges
-graph_f.comm <- cluster_fast_greedy(graph_m) #detect communities
-#membership(graph_m.comm)
-length(graph_f.comm) #number of communities - note that there are many small communities but only few major ones
-sizes(graph_f.comm) #sizes of communities
-
-#nodes with highest degrees in each of the major communities
-#community 1 - violence?
-head(sort(degree(graph_f)[graph_f.comm[[1]]], decreasing = TRUE), 20)
-#community 2 - action?
-head(sort(degree(graph_f)[graph_f.comm[[2]]], decreasing = TRUE), 20)
-#community 3 - relationships?
-head(sort(degree(graph_f)[graph_f.comm[[3]]], decreasing = TRUE), 20)
+##### ignore ########
+# #nodes with highest degrees in each of the major communities
+# #community 1 - relationships?
+# head(sort(degree(graph_m)[graph_m.comm[[1]]], decreasing = TRUE), 20)
+# c1 = names(head(sort(degree(graph_m)[graph_m.comm[[1]]], decreasing = TRUE), 20))
+# #community 2 - action?
+# head(sort(degree(graph_m)[graph_m.comm[[2]]], decreasing = TRUE), 20)
+# c2 = names(head(sort(degree(graph_m)[graph_m.comm[[2]]], decreasing = TRUE), 20))
+# #community 3 - violence?
+# head(sort(degree(graph_m)[graph_m.comm[[3]]], decreasing = TRUE), 20)
+# c3 = names(head(sort(degree(graph_m)[graph_m.comm[[3]]], decreasing = TRUE), 20))
+# 
+# male.c = c(c1, c2, c3)
+# subgraph.m = induced_subgraph(graph_m, male.c)
+# member.m = rep(1:3, each = 20)
+# clusters.m = make_clusters(subgraph.m, membership = member.m, modularity = TRUE)
+# #layout <-layout.fruchterman.reingold(graph_m)
+# plot(induced_subgraph(graph_m, male.c), vertex.colors = clusters.m$membership, vertex.size = 4, vertex.label = NA)
+# 
+# #DETECTING COMMUNITIES IN FEMALE NETWORKS
+# #filter to keep only words that occur at least 10 times
+# dfm_female <-  toks.female %>% dfm() %>% dfm_trim(min_termfreq = 10)
+# female_filtered = colnames(dfm_female)
+# toks.female <- token.all %>% 
+#   tokens_select(pattern = female_filtered, selection = 'keep', padding = TRUE)
+# #feature co-occurrence matrix for females
+# female_fcmat = fcm(toks.female, context = c("window"),
+#                  count = c("weighted"), #words are weighted within the window
+#                  window = 5)
+# 
+# female_fcmat[1:2,1:2] #a small portion of the feature co-occurrence matrix
+# 
+# graph_f = graph_from_adjacency_matrix(female_fcmat, mode = "undirected") #create graph from matrix
+# graph_f = simplify(graph_m, remove.loops = TRUE) #remove self-looping edges
+# graph_f.comm <- cluster_fast_greedy(graph_m) #detect communities
+# #membership(graph_m.comm)
+# length(graph_f.comm) #number of communities - note that there are many small communities but only few major ones
+# sizes(graph_f.comm) #sizes of communities
+# 
+# #nodes with highest degrees in each of the major communities
+# #community 1 - violence?
+# head(sort(degree(graph_f)[graph_f.comm[[1]]], decreasing = TRUE), 20)
+# #community 2 - action?
+# head(sort(degree(graph_f)[graph_f.comm[[2]]], decreasing = TRUE), 20)
+# #community 3 - relationships?
+# head(sort(degree(graph_f)[graph_f.comm[[3]]], decreasing = TRUE), 20)
 
 #note the presence of female characters in the relationship community for males
 #but male characters in the violence community for females

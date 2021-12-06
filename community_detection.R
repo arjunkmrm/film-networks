@@ -5,27 +5,32 @@ library(quanteda)
 library(igraph) #for creating graphs
 library(visNetwork) #for visualizing graphs
 
+source("token_filter.R") #filter tokens
 #load tokens, get it ready for analysis
 load("token.all.RData")
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
-
+#token.all <- token_filter2('noun', 1940, 2020, token.all)
 #select window of words around males and female characters
 #males
-toks.male <- token.all %>% 
-  tokens_select(pattern = 'male/characters', selection = 'remove', padding = TRUE, window = 5)
+# toks.male <- token.all %>% 
+#   tokens_select(pattern = 'male/characters', selection = 'remove', padding = TRUE, window = 5)
+# 
+# #females
+# toks.female <- token.all %>% 
+#   tokens_select(pattern = 'female/characters', selection = 'remove', padding = TRUE, window = 5)
 
-#females
-toks.female <- token.all %>% 
-  tokens_select(pattern = 'female/characters', selection = 'remove', padding = TRUE, window = 5)
-
-
+#gender = 'male'
 #DETECTING COMMUNITIES
+toks.all = token.all
+gender = 'female'
+detect_communities <- function(toks.all, gender = 'male'){
+  toks <- toks.all %>% 
+     tokens_select(pattern = paste(gender, '/characters', sep = ''), selection = 'remove', padding = TRUE, window = 5)
 
-detect_communities <- function(toks){
-#filter to keep only words that occur at least 10 times
+  #filter to keep only words that occur at least 10 times
 dfm <-  toks %>% dfm() %>% dfm_trim(min_termfreq = 10)
-filtered = colnames(male)
+filtered = colnames(dfm)
 toks <- token.all %>% 
   tokens_select(pattern = filtered, selection = 'keep', padding = TRUE)
 
@@ -45,57 +50,61 @@ graph <- set.edge.attribute(graph, "weight", value = edgelist$weight)
 graph = simplify(graph, remove.loops = TRUE) #remove self-looping edges
 
 #louvian communities
-louvain <- cluster_louvain(graph, weights = E(graph)$weights)#detect communities
+louvain <- cluster_louvain(graph, weights = E(graph)$weights)#detect communities 
 graph$community <- louvain$membership
 #unique(male_graph$community)
-print('modularity ', modularity(louvain))
+paste('modularity =', modularity(louvain))
 
-# #most important word in each community
-# communities <- data.frame()
-# 
-# for (i in unique(male_graph$community)) {
-#   # create subgraphs for each community
-#   subgraph <- induced_subgraph(male_graph, v = which(male_graph$community == i))
-#   # get size of each subgraph
-#   size <- igraph::gorder(subgraph)
-#   # get betweenness centrality
-#   btwn <-  igraph::betweenness(subgraph)
-#   communities <- communities %>% 
-#     dplyr::bind_rows(
-#       data.frame(community = i,
-#                  n_characters = size,
-#                  most_important = names(which(btwn == max(btwn)))
-#       )
-#     )
-# }
-# 
-# knitr::kable(communities %>% 
-#                dplyr::select(community, n_characters, most_important))
-
-#top five in each community
-top_ten <- data.frame()
+#most important word in each community
+communities <- data.frame()
 
 for (i in unique(graph$community)) {
   # create subgraphs for each community
   subgraph <- induced_subgraph(graph, v = which(graph$community == i))
+  # get size of each subgraph
+  size <- igraph::gorder(subgraph)
+  # get betweenness centrality
+  btwn <-  igraph::betweenness(subgraph)
+  communities <- communities %>%
+    dplyr::bind_rows(
+      data.frame(community = i,
+                 n_characters = size,
+                 most_important = names(which(btwn == max(btwn)))
+      )
+    )
+}
+
+communities = arrange(communities, desc(n_characters))
+top_comm <- communities$community[1:5]
+
+#knitr::kable(communities %>%
+#               dplyr::select(community, n_characters, most_important))
+
+#top five in each community
+top_ten <- data.frame()
+n = 0
+for (i in top_comm) {
+  # create subgraphs for each community
+  subgraph <- induced_subgraph(graph, v = which(graph$community == i))
   
   # for larger communities
-  if (igraph::gorder(subgraph) > 1000) {
+#  if (igraph::gorder(subgraph) > 1055) {
+    n = n + 1
     # get degree
     degree <-  igraph::degree(subgraph)
     # get top ten degrees
-    top <- names(head(sort(degree, decreasing = TRUE), 10))
-    result <- data.frame(community = i, rank = 1:10, character = top)
-  } else {
-    result <- data.frame(community = NULL, rank = NULL, character = NULL)
-  }
+    top <- names(head(sort(degree, decreasing = TRUE), 20))
+    result <- data.frame(community = i, rank = 1:20, character = top)
+ # } else {
+ #   result <- data.frame(community = NULL, rank = NULL, character = NULL)
+  #}
   
   top_ten <- top_ten %>% 
     dplyr::bind_rows(result)
 }
 
-#top_ten
-
+print(top_ten)
+n
 # knitr::kable(
 #   top_five %>% 
 #     tidyr::pivot_wider(names_from = rank, values_from = character)
@@ -106,7 +115,7 @@ subgraph <- induced_subgraph(graph, v = top_ten$character)
 subgraph <- simplify(subgraph)
 subgraph$community
 nodes = data.frame(character = names(V(subgraph)))
-group = rep(1:5, each = 10)
+group = rep(1:n, each = 20)
 top_ten$group = group
 clusters = inner_join(nodes, top_ten)
 subgraph$community <- clusters$group
@@ -166,6 +175,8 @@ E(subgraph)$weight <- edge.weights(clust_obj, subgraph)
 layout <- layout_with_fr(subgraph, weights=E(subgraph)$weight)
 plot(subgraph, layout=layout, col = communityColors)
 }
+
+detect_communities(token.all, 'female')
 
 #visIgraph(male_subgraph) %>% visIgraphLayout(layout = "layout_with_fr") %>% visNodes(size = 12)
 

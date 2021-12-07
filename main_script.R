@@ -23,6 +23,9 @@ load("token.all.RData")
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
 
+#sample based on min in a decade
+token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
+
 #create a token set with only generalized pos info
 pos_replace <- function(toks.replace){
   toks.replace <- toks.replace %>% 

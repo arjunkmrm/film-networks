@@ -10,6 +10,7 @@ source("token_filter.R") #filter tokens
 load("token.all.RData")
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
+token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
 #token.all <- token_filter2('noun', 1940, 2020, token.all)
 #select window of words around males and female characters
 #males
@@ -24,7 +25,7 @@ token.all <- tokens_tolower(token.all) #convert all tokens to lower
 #DETECTING COMMUNITIES
 #toks.all = token.all
 #gender = 'female'
-detect_communities <- function(toks.all, gender = 'male'){
+detect_communities <- function(toks.all, gender = 'male', nn = 10){
   toks <- toks.all %>% 
      tokens_select(pattern = paste(gender, '/characters', sep = ''), selection = 'remove', padding = TRUE, window = 5)
 
@@ -93,8 +94,8 @@ for (i in top_comm) {
     # get degree
     degree <-  igraph::degree(subgraph)
     # get top ten degrees
-    top <- names(head(sort(degree, decreasing = TRUE), 20))
-    result <- data.frame(community = i, rank = 1:20, word = top)
+    top <- names(head(sort(degree, decreasing = TRUE), nn))
+    result <- data.frame(community = i, rank = 1:nn, word = top)
  # } else {
  #   result <- data.frame(community = NULL, rank = NULL, character = NULL)
   #}
@@ -116,7 +117,7 @@ subgraph <- induced_subgraph(graph, v = top_ten$word)
 subgraph <- simplify(subgraph)
 subgraph$community
 nodes = data.frame(word = names(V(subgraph)))
-group = rep(1:n, each = 20)
+group = rep(1:n, each = nn)
 top_ten$group = group
 clusters = inner_join(nodes, top_ten)
 subgraph$community <- clusters$group
@@ -177,7 +178,7 @@ layout <- layout_with_fr(subgraph, weights=E(subgraph)$weight)
 plot(subgraph, layout=layout, col = communityColors)
 }
 
-detect_communities(token.all, 'female')
+detect_communities(token.all, 'female', 10)
 
 #visIgraph(male_subgraph) %>% visIgraphLayout(layout = "layout_with_fr") %>% visNodes(size = 12)
 

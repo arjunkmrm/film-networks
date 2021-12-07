@@ -93,8 +93,8 @@ for (i in top_comm) {
     # get degree
     degree <-  igraph::degree(subgraph)
     # get top ten degrees
-    top <- names(head(sort(degree, decreasing = TRUE), 15))
-    result <- data.frame(community = i, rank = 1:15, character = top)
+    top <- names(head(sort(degree, decreasing = TRUE), 20))
+    result <- data.frame(community = i, rank = 1:20, word = top)
  # } else {
  #   result <- data.frame(community = NULL, rank = NULL, character = NULL)
   #}
@@ -104,6 +104,7 @@ for (i in top_comm) {
 }
 
 print(top_ten)
+write.csv(top_ten, paste(gender, '.csv', sep = ''))
 n
 # knitr::kable(
 #   top_five %>% 
@@ -111,11 +112,11 @@ n
 # )
 
 #Visualising the communities
-subgraph <- induced_subgraph(graph, v = top_ten$character)
+subgraph <- induced_subgraph(graph, v = top_ten$word)
 subgraph <- simplify(subgraph)
 subgraph$community
-nodes = data.frame(character = names(V(subgraph)))
-group = rep(1:n, each = 15)
+nodes = data.frame(word = names(V(subgraph)))
+group = rep(1:n, each = 20)
 top_ten$group = group
 clusters = inner_join(nodes, top_ten)
 subgraph$community <- clusters$group

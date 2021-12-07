@@ -54,7 +54,7 @@ graph = simplify(graph, remove.loops = TRUE) #remove self-looping edges
 louvain <- cluster_louvain(graph, weights = E(graph)$weights)#detect communities 
 graph$community <- louvain$membership
 #unique(male_graph$community)
-paste('modularity =', modularity(louvain))
+
 
 #most important word in each community
 communities <- data.frame()
@@ -77,6 +77,7 @@ for (i in unique(graph$community)) {
 
 communities = arrange(communities, desc(n_characters))
 top_comm <- communities$community[1:5]
+print(communities)
 
 #knitr::kable(communities %>%
 #               dplyr::select(community, n_characters, most_important))
@@ -106,6 +107,8 @@ for (i in top_comm) {
 
 print(top_ten)
 write.csv(top_ten, paste(gender, '.csv', sep = ''))
+
+print(paste('modularity =', modularity(louvain)))
 n
 # knitr::kable(
 #   top_five %>% 

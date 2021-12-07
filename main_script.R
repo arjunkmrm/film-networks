@@ -60,7 +60,7 @@ for(j in 0:7){ #for loop to run for each decade
   
   #plot for adjectives
   ggplot(p_decdat[pos == "adj",], aes(x = year, y = p, color = gender)) +
-    geom_point(size = 1.3) + geom_smooth(method = "lm", aes(fill = gender), alpha = 0.1) +
+    geom_point(size = 1.3) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
     geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Adjectives") +
     theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
           legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
@@ -73,7 +73,7 @@ for(j in 0:7){ #for loop to run for each decade
   
   #plot for verbs
   ggplot(p_decdat[pos == "verb",], aes(x = year, y = p, color = gender)) +
-    geom_point(size = 1.2) + geom_smooth(method = "lm", aes(fill = gender), alpha = 0.1) +
+    geom_point(size = 1.2) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
     geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Verbs") + theme_minimal() +
     theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
           legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
@@ -87,7 +87,8 @@ for(j in 0:7){ #for loop to run for each decade
   #plot for nouns
   ggplot(p_decdat[pos == "noun",], aes(x = year, y = p, color = gender)) +
     geom_point(size = 1.2) +
-    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Nouns") + geom_smooth(method = "lm", aes(fill = gender), alpha = 0.1) +
+    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Nouns") + 
+    geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
     theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
           legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
           panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))

@@ -11,7 +11,7 @@ load("token.all.RData")
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
 token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
-#token.all <- token_filter2('noun', 1940, 2020, token.all)
+#token.all <- token_filter2('all', 1980, 2020, token.all)
 #select window of words around males and female characters
 #males
 # toks.male <- token.all %>% 
@@ -131,12 +131,12 @@ V(subgraph)$size <- 5
 V(subgraph)$frame.color <- "white"
 V(subgraph)$color <- subgraph$community
 #V(male_subgraph)$label <- V(male_subgraph)$name
-V(subgraph)$label.cex <- 1.5
+V(subgraph)$label.cex <- 1.8
 
 # also color edges according to their starting node
-edge.start <- ends(subgraph, es = E(subgraph), names = F)[,1]
-E(subgraph)$color <- V(subgraph)$color[edge.start]
-E(subgraph)$arrow.mode <- 0
+#edge.start <- ends(subgraph, es = E(subgraph), names = F)[,1]
+#E(subgraph)$color <- V(subgraph)$color[edge.start]
+#E(subgraph)$arrow.mode <- 0
 
 # only label central characters
 #v_labels <- which(V(friends_graph)$name %in% friends)

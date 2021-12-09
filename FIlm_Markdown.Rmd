@@ -1,0 +1,126 @@
+---
+title: "Film_Markdown"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries
+
+```{r}
+#load libraries
+library(tidyverse) 
+library(quanteda) #for text cleaning
+library(igraph) #for creating graphs
+library(visNetwork) #for visualizing graphs
+library(wordcloud) #for creating wordclouds
+```
+
+## Load function scripts and data
+
+```{r}
+#load_functions
+source("calculatecoocstats.R") #calculate co-occurrence statistics
+source("grapher.R") #create graph
+#Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
+source("rawcounts.R") #find raw counts of co-occurrences
+source("token_filter.R") #filter tokens
+```
+
+## Load token data
+
+```{r}
+#load tokens, get it ready for analysis
+load("token.all.RData")
+#convert tokens to all lower
+token.all <- tokens_tolower(token.all) #convert all tokens to lower
+#sample based on min in a decade
+token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
+```
+
+## Find Probability of Verbs/Adj/Noun given male/female across decades
+
+```{r}
+#create a token set with only generalized pos info
+pos_replace <- function(toks.replace){
+  toks.replace <- toks.replace %>% 
+    tokens_replace(pattern = c("*/NOUN", "*/VERB", "*/ADJ"), replacement = c("NOUN", "VERB", "ADJ"))
+  return(toks.replace)
+}
+token.pos <- pos_replace(token.all) 
+
+p_decdat <- data.frame() #initialize data frame
+pos = c('verb', 'adj', 'noun') #pos to be analysed
+
+for(j in 0:7){ #for loop to run for each decade
+  year = 1940 + j*10 #create decade variable
+  pos_counts <- rawcounts(token_filter("all", year, token.pos)) #find raw co-occurrence counts
+  male_pos <- pos_counts["male/characters", pos] #filter pos
+  male_p <- male_pos / sum(male_pos) #find empirical probability
+  male_pdat <- data.frame(pos = names(male_pos), p = male_p) #organise data frame
+  male_pdat$gender = "male" #assign gender
+  
+  #do the same for females
+  female_pos <- pos_counts["female/characters", pos]
+  female_p <- female_pos / sum(female_pos)
+  female_pdat <- data.frame(pos = names(female_pos), p = female_p)
+  female_pdat$gender = "female"
+  
+  p_decdat.temp <- rbind(male_pdat, female_pdat) #bind gender data
+  p_decdat.temp$year <- year #assign year
+  p_decdat <- rbind(p_decdat, p_decdat.temp) #bind ind. decade with overall
+}
+
+```
+
+### Adjectives
+
+```{r}
+  #plot for adjectives
+  ggplot(p_decdat[pos == "adj",], aes(x = year, y = p, color = gender)) +
+    geom_point(size = 1.3) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
+    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Adjectives") +
+    theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
+          legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+  ggsave("adj.png")
+  
+  #find significance
+  ancova.adj <- aov(p ~ year*gender, data = p_decdat[pos == "adj",])
+  summary(ancova.adj)
+
+```  
+    
+### Verbs    
+    
+```{r}  
+  #plot for verbs
+  ggplot(p_decdat[pos == "verb",], aes(x = year, y = p, color = gender)) +
+    geom_point(size = 1.2) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
+    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Verbs") + theme_minimal() +
+    theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
+          legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+  ggsave("verb.png")
+  
+  #find significance
+  ancova.verb <- aov(p ~ year*gender, data = p_decdat[pos == "verb",])
+  summary(ancova.verb)
+```
+
+### Nouns
+
+```{r}
+  #plot for nouns
+  ggplot(p_decdat[pos == "noun",], aes(x = year, y = p, color = gender)) +
+    geom_point(size = 1.2) +
+    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Nouns") + 
+    geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
+    theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
+          legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+  ggsave("noun.png")
+```
+

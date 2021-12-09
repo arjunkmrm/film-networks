@@ -1,0 +1,328 @@
+---
+title: "Film_Markdown"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Load libraries
+
+```{r, message=FALSE}
+#load libraries
+library(tidyverse) 
+library(quanteda) #for text cleaning
+library(igraph) #for creating graphs
+library(visNetwork) #for visualizing graphs
+library(wordcloud) #for creating wordclouds
+```
+
+### Load function scripts and data
+
+```{r}
+#load_functions
+source("calculatecoocstats.R") #calculate co-occurrence statistics
+source("grapher.R") #create graph
+#Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
+source("rawcounts.R") #find raw counts of co-occurrences
+source("token_filter.R") #filter tokens
+```
+
+### Load token data
+
+```{r}
+#load tokens, get it ready for analysis
+load("token.all.RData")
+#convert tokens to all lower
+token.all <- tokens_tolower(token.all) #convert all tokens to lower
+#sample based on min in a decade
+token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
+```
+
+### Find Probability of Verbs/Adj/Noun given male/female across decades
+
+```{r, message=FALSE}
+#create a token set with only generalized pos info
+pos_replace <- function(toks.replace){
+  toks.replace <- toks.replace %>% 
+    tokens_replace(pattern = c("*/NOUN", "*/VERB", "*/ADJ"), replacement = c("NOUN", "VERB", "ADJ"))
+  return(toks.replace)
+}
+token.pos <- pos_replace(token.all) 
+
+p_decdat <- data.frame() #initialize data frame
+pos = c('verb', 'adj', 'noun') #pos to be analysed
+
+for(j in 0:7){ #for loop to run for each decade
+  year = 1940 + j*10 #create decade variable
+  pos_counts <- rawcounts(token_filter("all", year, token.pos)) #find raw co-occurrence counts
+  male_pos <- pos_counts["male/characters", pos] #filter pos
+  male_p <- male_pos / sum(male_pos) #find empirical probability
+  male_pdat <- data.frame(pos = names(male_pos), p = male_p) #organise data frame
+  male_pdat$gender = "male" #assign gender
+  
+  #do the same for females
+  female_pos <- pos_counts["female/characters", pos]
+  female_p <- female_pos / sum(female_pos)
+  female_pdat <- data.frame(pos = names(female_pos), p = female_p)
+  female_pdat$gender = "female"
+  
+  p_decdat.temp <- rbind(male_pdat, female_pdat) #bind gender data
+  p_decdat.temp$year <- year #assign year
+  p_decdat <- rbind(p_decdat, p_decdat.temp) #bind ind. decade with overall
+}
+
+```
+
+#### Adjectives
+
+```{r, echo=FALSE, message=FALSE}
+  #plot for adjectives
+  ggplot(p_decdat[pos == "adj",], aes(x = year, y = p, color = gender)) +
+    geom_point(size = 1.3) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
+    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Adjectives") +
+    theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
+          legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+  ggsave("adj.png")
+  
+  #find significance
+  ancova.adj <- aov(p ~ year*gender, data = p_decdat[pos == "adj",])
+  summary(ancova.adj)
+
+```  
+    
+#### Verbs    
+    
+```{r, echo=FALSE, message=FALSE}  
+  #plot for verbs
+  ggplot(p_decdat[pos == "verb",], aes(x = year, y = p, color = gender)) +
+    geom_point(size = 1.2) + geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
+    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Verbs") + theme_minimal() +
+    theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
+          legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+  ggsave("verb.png")
+  
+  #find significance
+  ancova.verb <- aov(p ~ year*gender, data = p_decdat[pos == "verb",])
+  summary(ancova.verb)
+  
+```
+
+#### Nouns
+
+```{r, echo=FALSE}
+  #plot for nouns
+  ggplot(p_decdat[pos == "noun",], aes(x = year, y = p, color = gender)) +
+    geom_point(size = 1.2) +
+    geom_line(size = 0.8) + theme_minimal() + ggtitle("Probability of co-occurence with Nouns") + 
+    geom_smooth(method = "lm", formula = y ~ x + I(x^2), aes(fill = gender), alpha = 0.1) +
+    theme(axis.text = element_text(color = "black", size = 14), axis.title = element_text(color = "black", size = 15.5),
+          legend.text = element_text(color = "black", size = 14), legend.title = element_text(color = "black", size = 15.5),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+  ggsave("noun.png")
+  
+    #find significance
+  ancova.noun <- aov(p ~ year*gender, data = p_decdat[pos == "noun",])
+  summary(ancova.noun)
+```
+### Community analysis
+#### 1940 - 2020
+
+##### Load and prepare data
+
+```{r}
+load("token.all.RData")
+#convert tokens to all lower
+token.all <- tokens_tolower(token.all) #convert all tokens to lower
+token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
+#token.all <- token_filter2('all', 2000, 2010, token.all)
+```
+
+##### Function to detect and plor community structure
+
+```{r}
+
+detect_communities <- function(toks.all, gender = 'male', nn = 10){
+  toks.all = token_filter2('all', 2000, 2010, toks.all)
+  toks <- toks.all %>% 
+     tokens_select(pattern = paste(gender, '/characters', sep = ''), selection = 'remove', padding = TRUE, window = 5)
+
+  #filter to keep only words that occur at least 10 times
+dfm <-  toks %>% dfm() %>% dfm_trim(min_termfreq = 10)
+filtered = colnames(dfm)
+toks <- token.all %>% 
+  tokens_select(pattern = filtered, selection = 'keep', padding = TRUE)
+
+#feature co-occurrence matrix for males
+fcmat = fcm(toks, context = c("window"),
+                 count = c("weighted"), #words are weighted within the window
+                 window = 5)
+
+graph = graph_from_adjacency_matrix(fcmat, weighted = TRUE) #create graph from matrix
+edgelist <- get.data.frame(graph)
+edgelist_m <- as.matrix(edgelist[ ,c("from", "to")])
+
+graph <- graph_from_edgelist(edgelist_m, directed = FALSE) 
+graph <- set.edge.attribute(graph, "weight", value = edgelist$weight)
+graph = simplify(graph, remove.loops = TRUE) #remove self-looping edges
+
+#louvian communities
+louvain <- cluster_louvain(graph, weights = E(graph)$weights)#detect communities 
+graph$community <- louvain$membership
+
+#most important word in each community
+communities <- data.frame()
+
+for (i in unique(graph$community)) {
+  # create subgraphs for each community
+  subgraph <- induced_subgraph(graph, v = which(graph$community == i))
+  # get size of each subgraph
+  size <- igraph::gorder(subgraph)
+  # get betweenness centrality
+  btwn <-  igraph::betweenness(subgraph)
+  communities <- communities %>%
+    dplyr::bind_rows(
+      data.frame(community = i,
+                 n_characters = size,
+                 most_important = names(which(btwn == max(btwn)))
+      )
+    )
+}
+
+communities = arrange(communities, desc(n_characters))
+top_comm <- communities$community[1:5]
+print(communities)
+
+#top ten in each community
+top_ten <- data.frame()
+n = 0
+for (i in top_comm) {
+  # create subgraphs for each community
+  subgraph <- induced_subgraph(graph, v = which(graph$community == i))
+    n = n + 1
+    # get degree
+    degree <-  igraph::degree(subgraph)
+    # get top ten degrees
+    top <- names(head(sort(degree, decreasing = TRUE), nn))
+    result <- data.frame(community = i, rank = 1:nn, word = top)
+    top_ten <- top_ten %>% 
+    dplyr::bind_rows(result)
+}
+
+print(top_ten)
+#write.csv(top_ten, paste(gender, '.csv', sep = ''))
+print(paste('modularity =', modularity(louvain)))
+
+#Visualizing the communities
+subgraph <- induced_subgraph(graph, v = top_ten$word)
+subgraph <- simplify(subgraph)
+subgraph$community
+nodes = data.frame(word = names(V(subgraph)))
+group = rep(1:n, each = nn)
+top_ten$group = group
+clusters = inner_join(nodes, top_ten)
+subgraph$community <- clusters$group
+#unique(subgraph$community)
+
+# give our nodes some properties, incl scaling them by degree and coloring them by community
+V(subgraph)$size <- 5
+V(subgraph)$frame.color <- "white"
+V(subgraph)$color <- subgraph$community
+#V(male_subgraph)$label <- V(male_subgraph)$name
+V(subgraph)$label.cex <- 1.8
+
+# also color edges according to their starting node
+#edge.start <- ends(subgraph, es = E(subgraph), names = F)[,1]
+#E(subgraph)$color <- V(subgraph)$color[edge.start]
+#E(subgraph)$arrow.mode <- 0
+
+#plot by groups
+#make clusters first
+clust_obj = make_clusters(subgraph, membership = clusters$group)
+
+# weights <- ifelse(crossing(male_clust, male_subgraph), 1, 100)
+# layout <- layout_with_kk(male_subgraph, weights=weights)
+# plot(male_subgraph, layout=layout)
+
+prettyColors <- c("turquoise4", "azure4", "olivedrab","deeppink4", "blue")
+communityColors <- prettyColors[membership(clust_obj)]
+
+edge.weights <- function(community, network, weight.within = 100, weight.between = 1) {
+  bridges <- crossing(communities = community, graph = network)
+  weights <- ifelse(test = bridges, yes = weight.between, no = weight.within)
+  return(weights) 
+}
+E(subgraph)$weight <- edge.weights(clust_obj, subgraph)
+layout <- layout_with_fr(subgraph, weights=E(subgraph)$weight)
+plot(subgraph, layout=layout, col = communityColors)
+}
+```
+
+##### Male communities
+
+```{r, fig.width = 22, fig.height = 17, message=FALSE}
+detect_communities(token.all, 'male', 10)
+```
+
+##### Female communities
+
+```{r, fig.width = 22, fig.height = 17, message=FALSE}
+detect_communities(token.all, 'female', 10)
+```
+
+#### Modelling edge weight across decades
+
+##### Action - Led/Verb
+
+```{r}
+all_ind <- data.frame() #initialise
+term <- "led/verb" #term to find PPMI for
+pos <- "verb" #pos of word 
+for(i in 0 : 7){ #for loop to run across decades
+  j = 1940 + 10*i
+  male_ind = grapher("male/characters", 10 ,token_filter(pos, j, token.all), "MI")[[3]][] #get PPMI data for given decade
+  male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+  male_ind <- male_ind %>% filter(names == term) #filter term given
+  male_ind$year = j #attach year info
+  male_ind$gender = "male" #assign gender
+  
+  #same for females
+  j = 1940 + 10*i
+  female_ind = grapher("female/characters", 10 ,token_filter(pos, j, token.all), "MI")[[3]][]
+  female_ind$rank = 1 : nrow(female_ind)
+  female_ind <- female_ind %>% filter(names == term)
+  female_ind$year = j
+  female_ind$gender = "female"
+
+  #bind to overall data
+  all_ind <- rbind(all_ind, male_ind, female_ind)
+}
+
+#plot 
+ggplot(all_ind, aes(x = year, y = loglik, color = gender)) +
+  geom_point(color = "black") + 
+  geom_line(size = 1) +
+  geom_smooth(method = "lm", se = TRUE, size = 1, aes(fill = gender), alpha = 0.1) + theme_minimal() +
+  ylab("Pointwise Mutual Information") + ggtitle("Led/Verb") +
+  theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
+        legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
+        panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+ggsave("loves_verb.png", width = 6, height = 4)
+
+#check significance
+ancova.word <- lm(loglik~year*gender, data = all_ind)
+summary(ancova.word)
+anova(ancova.word)
+
+#check significance - females
+all_ind_fem <- all_ind %>% filter(gender == "female")
+ancova.word <- lm(loglik~year, data = all_ind_fem)
+summary(ancova.word)
+anova(ancova.word) 
+```
+

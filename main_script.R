@@ -100,9 +100,10 @@ for(j in 0:7){ #for loop to run for each decade
   
 #2. Individual words - PPMI across decades 
 
+plot_word <- function(term, pos){
 all_ind <- data.frame() #initialise
-term <- "led/verb" #term to find PPMI for
-pos <- "verb" #pos of word 
+#term <- "best/adj" #term to find PPMI for
+#pos <- "adj" #pos of word 
 for(i in 0 : 7){ #for loop to run across decades
   j = 1940 + 10*i
   male_ind = grapher("male/characters", 10 ,token_filter(pos, j, token.all), "MI")[[3]][] #get PPMI data for given decade
@@ -128,11 +129,14 @@ ggplot(all_ind, aes(x = year, y = loglik, color = gender)) +
   geom_point(color = "black") + 
   geom_line(size = 1) +
   geom_smooth(method = "lm", se = TRUE, size = 1, aes(fill = gender), alpha = 0.1) + theme_minimal() +
-  ylab("Pointwise Mutual Information") + ggtitle("Loves/Verb") +
+  ylab("Pointwise Mutual Information") + ggtitle(term) +
   theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
         legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
         panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
-ggsave("loves_verb.png", width = 6, height = 4)
+}
+
+plot_word('arrives/verb', 'verb')
+ggsave("arrives_verb.png", width = 6, height = 4)
 
 #check significance
 ancova.word <- lm(loglik~year*gender, data = all_ind)
@@ -149,10 +153,10 @@ anova(ancova.word)
 library(wordcloud)
 #male
 male.perm <- data.frame() #initialize
-  graph.m = grapher("male/characters", 50, token_filter2("all", 1940, 2010, token.all)) #extract graph info
+  graph.m = grapher("male/characters", 50, token_filter2("noun", 1940, 2020, token.all)) #extract graph info
   gr.m <- graph.m[[3]] #pass graph object
   gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
-  gr.m <- gr.m[1:20,] #filter 20 
+  gr.m <- gr.m[1:22,] #filter 20 
   gr.m$rank = 1 : nrow(gr.m) #rank
   gr.m$gender = "male" #assign gender
   
@@ -166,6 +170,7 @@ male.perm <- data.frame() #initialize
   #word cloud
   wordcloud(gr.m$names, as.integer(gr.m$loglik), rot.per = 0, colors = brewer.pal(4, "RdYlBu"))
   
+  gr.m
   #network
   visIgraph(graph.m[[1]]) %>% visNodes(font = list(size = 28))
   #graphm_df = as_data_frame(graph.m[[1]])
@@ -195,10 +200,10 @@ male.perm <- data.frame() #initialize
   
   #female
   female.perm <- data.frame()
-  graph.f = grapher("female/characters", 25, token_filter2("all", 1940, 2010, token.all))
+  graph.f = grapher("female/characters", 25, token_filter2("noun", 1940, 2020, token.all))
   gr.f <- graph.f[[3]]
   gr.f <- gr.f[gr.f$names != "male/characters",]
-  gr.f <- gr.f[1:20,]
+  gr.f <- gr.f[1:21,]
   gr.f$rank = 1 : nrow(gr.f)
   gr.f$gender = "female"
   
@@ -209,6 +214,8 @@ male.perm <- data.frame() #initialize
     xlab("co-occurring terms")
   ggsave("fv_wc.png")
   
+  
+  gr.f
   #word cloud
   wordcloud(gr.f$names, as.integer(gr.f$loglik), rot.per = 0, colors = brewer.pal(4, "RdYlBu"))
  

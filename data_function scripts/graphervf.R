@@ -1,8 +1,11 @@
 ##### function to create graphs #####
 #Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
 
-grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
-  oppositeg = ifelse(coocTerm == 'male/characters', 'female/characters', 'male/characters')
+graphervf <- function(numberOfCoocs, toks, measure = "LOGLIK"){
+  #oppositeg = ifelse(coocTerm == 'male/characters', 'female/characters', 'male/characters')
+  
+  #### graph df function
+  graph_df <- function(coocTerm){
   minimumFrequency = 10
   binDTM <- toks %>% 
     dfm() %>% 
@@ -54,9 +57,24 @@ grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
   
   # Sample of some examples from resultGraph
   resultGraph[sample(nrow(resultGraph), 6), ]
-  
+  list_graph = list()
+  list_graph[[1]] = imm.coocs
+  list_graph[[2]] = resultGraph
+  return(list_graph)
+  }
+  male_list = graph_df('male/characters')
+  female_list = graph_df('female/characters')
+  male = male_list[[2]]
+  male_coocs = male_list[[1]]
+  female = female_list[[2]]
+  female_coocs = female_list[[1]]
+  complete = rbind(male, female)
+  tail(complete)
+  complete <- distinct(complete)
+  nrow(complete)
   # set seed for graph plot
   set.seed(42)
+  resultGraph = complete
   
   # Create the graph object as undirected graph
   graphNetwork <- graph.data.frame(resultGraph, directed = F)
@@ -65,19 +83,29 @@ grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
   verticesToRemove <- V(graphNetwork)[degree(graphNetwork) < 2]
   # These edges are removed from the graph
   graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
+  #imm.coocs
   
   #for vertices #####
   #male to female - not needed
-  mtf = rowSums(ends(graphNetwork, es = E(graphNetwork), names = T) == c('male/characters', 'female/characters'))
+  #ftm = rowSums(ends(graphNetwork, es = E(graphNetwork), names = T) == c('female/characters', 'male/characters'))
   #female primary nodes
-  fto = ends(graphNetwork, es = E(graphNetwork), names = T)[,1] == oppositeg
-  fto2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] == oppositeg
-  #female connections
+  fto = ends(graphNetwork, es = E(graphNetwork), names = T)[,1] == 'female/characters'
+  fto2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] == 'female/characters'
+  #male primary nodes
+  mto = ends(graphNetwork, es = E(graphNetwork), names = T)[,1] == 'male/characters'
+  mto2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] == 'male/characters'
+  
+   #female connections
   fc = ends(graphNetwork, es = E(graphNetwork), names = T)[,2][as.logical(fto)]
   fc2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,1][as.logical(fto2)]
-  imm.coocs
+  #male connections
+  mc = ends(graphNetwork, es = E(graphNetwork), names = T)[,2][as.logical(fto)]
+  mc2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,1][as.logical(fto2)]
+  
+  #imm.coocs
   #male and female
-  maf = intersect(fc2, imm.coocs)
+  maf = intersect(fc2, male_coocs)
+  #fam = intersect(mc2, female_coocs)
   
   #for edges #####
   fem <- rep(oppositeg, length(maf))
@@ -91,17 +119,17 @@ grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
   m.maf$x = paste(m.maf$V2, m.maf$V1)
   #common nodes between males and females?
   #male primary nodes
-  mpn = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] %in% imm.coocs
+  mpn = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] %in% male_coocs
   #male female intersection
   mfi = all_edges$x %in% m.maf$x
   sum(mfi)
   
   # Assign colors to nodes (search term blue, primary green, others orange)
-  V(graphNetwork)$color <- ifelse(V(graphNetwork)$name == coocTerm, adjustcolor('cornflowerblue', alpha = 0.9),
-                                  ifelse(V(graphNetwork)$name %in% c(oppositeg), adjustcolor('orange', alpha = 0.9),
+  V(graphNetwork)$color <- ifelse(V(graphNetwork)$name == c('male/characters'), adjustcolor('cornflowerblue', alpha = 0.9),
+                                  ifelse(V(graphNetwork)$name %in% c('female/characters'), adjustcolor('orange', alpha = 0.9),
                                          ifelse(V(graphNetwork)$name %in% maf, adjustcolor('purple', alpha = 0.8),
-                                  ifelse(V(graphNetwork)$name %in% imm.coocs, adjustcolor('cornflowerblue', alpha = 0.8),
-                                         ifelse(V(graphNetwork)$name %in% fc, adjustcolor('orange', alpha = 0.9), adjustcolor('grey', alpha = 0.4))))))
+                                  ifelse(V(graphNetwork)$name %in% male_coocs, adjustcolor('cornflowerblue', alpha = 0.8),
+                                         ifelse(V(graphNetwork)$name %in% female_coocs, adjustcolor('orange', alpha = 0.9), adjustcolor('grey', alpha = 0.4))))))
   
   #V(graphNetwork)$color <- ifelse(V(graphNetwork)$name %in% fc, 'orange', V(graphNetwork)$color)
   # Set edge colors
@@ -109,12 +137,12 @@ grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
   # scale significance between 1 and 10 for edge width
   E(graphNetwork)$width <- scales::rescale(E(graphNetwork)$sig, to = c(1, 10))
   
-  
+  E(graphNetwork)$color <- adjustcolor('DarkGray', alpha.f = 0.4)
    
-   E(graphNetwork)$color <- ifelse(mtf == 2, adjustcolor('cornflowerblue', alpha.f = 0.4),
-                                   ifelse(mfi == TRUE, adjustcolor('orange', alpha.f = 0.4),
-                                   ifelse(fto == TRUE, adjustcolor('orange', alpha.f = 0.4),
-                                   ifelse(mpn == TRUE, adjustcolor('cornflowerblue', alpha.f = 0.4), adjustcolor('DarkGray', alpha.f = .4)))))
+   # E(graphNetwork)$color <- ifelse(mtf == 2, adjustcolor('cornflowerblue', alpha.f = 0.4),
+   #                                 ifelse(mfi == TRUE, adjustcolor('orange', alpha.f = 0.4),
+   #                                 ifelse(fto == TRUE, adjustcolor('orange', alpha.f = 0.4),
+   #                                 ifelse(mpn == TRUE, adjustcolor('cornflowerblue', alpha.f = 0.4), adjustcolor('DarkGray', alpha.f = .4)))))
    #E(graphNetwork)$width <- ifelse(mtf == 2, 6, ifelse(fto == 1, 6, 2))
    
    #E(graphNetwork)$color <- ifelse(mfi == TRUE, adjustcolor('purple', alpha.f = 0.4), adjustcolor('DarkGray', alpha.f = .4))

@@ -2,7 +2,7 @@
   
   numberOfCoocs = 20
   toks = token.all
-  coocTerm = 'male/characters'
+  coocTerm = 'female/characters'
   measure = 'LOGLIK'
   minimumFrequency = 10
   binDTM <- toks %>% 

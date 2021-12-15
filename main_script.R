@@ -13,6 +13,7 @@ library(wordcloud) #for creating wordclouds
 #load_functions
 source("calculatecoocstats.R") #calculate co-occurrence statistics
 source("grapher.R") #create graph
+source("graphervf.R")
 #Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
 
 source("rawcounts.R") #find raw counts of co-occurrences
@@ -153,7 +154,8 @@ anova(ancova.word)
 library(wordcloud)
 #male
 male.perm <- data.frame() #initialize
-  graph.m = grapher("male/characters", 20, token_filter2("noun", 1940, 2020, token.all)) #extract graph info
+  #graph.m = grapher("male/characters", 20, token_filter2("noun", 1940, 2020, token.all)) #extract graph info
+  graph.m = grapher("male/characters", 20, token.all) 
   gr.m <- graph.m[[3]] #pass graph object
   gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
   gr.m <- gr.m[1:22,] #filter 20 
@@ -200,7 +202,8 @@ male.perm <- data.frame() #initialize
   
   #female
   female.perm <- data.frame()
-  graph.f = grapher("female/characters", 25, token_filter2("noun", 1940, 2020, token.all))
+  #graph.f = grapher("female/characters", 20, token_filter2("noun", 1940, 2020, token.all))
+  graph.f = grapher("female/characters", 20, token.all) 
   gr.f <- graph.f[[3]]
   gr.f <- gr.f[gr.f$names != "male/characters",]
   gr.f <- gr.f[1:21,]
@@ -214,11 +217,13 @@ male.perm <- data.frame() #initialize
     xlab("co-occurring terms")
   ggsave("fv_wc.png")
   
-  
+  #merge male female and remove duples?
   gr.f
   #word cloud
   wordcloud(gr.f$names, as.integer(gr.f$loglik), rot.per = 0, colors = brewer.pal(4, "RdYlBu"))
  
+  visIgraph(graph.f[[1]]) %>% visNodes(font = list(size = 28))
+  
   #community structure
   graphf = graph.f[[1]] #store graph object
   visf <- toVisNetworkData(graphf) #create visnetwork object
@@ -238,4 +243,9 @@ male.perm <- data.frame() #initialize
   visSave(visf_graph, "female_graph.html", selfcontained = TRUE, background = "white")
   
   graphf
-  
+  source("graphervf.R")
+ graph = graphervf(20, token_filter2("noun", 2000, 2020, token.all))
+ visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
+ visIgraph(graph[[1]])
+ 
+ 

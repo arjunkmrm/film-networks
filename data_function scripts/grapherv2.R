@@ -1,7 +1,9 @@
-##### function to create graphs #####
-#Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
 
-grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
+  
+  numberOfCoocs = 20
+  toks = token.all
+  coocTerm = 'male/characters'
+  measure = 'LOGLIK'
   minimumFrequency = 10
   binDTM <- toks %>% 
     dfm() %>% 
@@ -9,10 +11,10 @@ grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
     dfm_weight("boolean")
   
   coocs <- calculateCoocStatistics(coocTerm, binDTM, measure)
-
+  
   # Display the numberOfCoocs main terms
   imm.coocs <- names(coocs[1:numberOfCoocs])
-  
+  imm.coocs
   resultGraph <- data.frame(from = character(), to = character(), sig = numeric(0))
   
   # The structure of the temporary graph object is equal to that of the resultGraph
@@ -65,60 +67,18 @@ grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
   # These edges are removed from the graph
   graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
   
-  #male to female - not needed
-  mtf = rowSums(ends(graphNetwork, es = E(graphNetwork), names = T) == c('male/characters', 'female/characters'))
-  #female primary nodes
-  fto = ends(graphNetwork, es = E(graphNetwork), names = T)[,1] == 'female/characters'
-  fto2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] == 'female/characters'
-  #female connections
-  fc = ends(graphNetwork, es = E(graphNetwork), names = T)[,2][as.logical(fto)]
-  fc2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,1][as.logical(fto2)]
-  imm.coocs
-  #male and female
-  maf = intersect(fc2, imm.coocs)
+  # Assign colors to nodes (search term blue, others orange)
+  V(graphNetwork)$color <- ifelse(V(graphNetwork)$name == coocTerm, 'cornflowerblue', ifelse(V(graphNetwork)$name %in% imm.coocs, 'darkolivegreen', 'orange')) 
   
-  # Assign colors to nodes (search term blue, primary green, others orange)
-  V(graphNetwork)$color <- ifelse(V(graphNetwork)$name == coocTerm, adjustcolor('cornflowerblue', alpha = 0.9),
-                                  ifelse(V(graphNetwork)$name %in% c('female/characters'), adjustcolor('darkolivegreen', alpha = 0.9),
-                                         ifelse(V(graphNetwork)$name %in% maf, adjustcolor('purple', alpha = 0.8),
-                                  ifelse(V(graphNetwork)$name %in% imm.coocs, adjustcolor('cornflowerblue', alpha = 0.8),
-                                         ifelse(V(graphNetwork)$name %in% fc, 'orange', adjustcolor('grey', alpha = 0.4))))))
-  
-  #V(graphNetwork)$color <- ifelse(V(graphNetwork)$name %in% fc, 'orange', V(graphNetwork)$color)
   # Set edge colors
-  #E(graphNetwork)$color <- adjustcolor("DarkGray", alpha.f = .5)
+  E(graphNetwork)$color <- adjustcolor("DarkGray", alpha.f = .5)
   # scale significance between 1 and 10 for edge width
   E(graphNetwork)$width <- scales::rescale(E(graphNetwork)$sig, to = c(1, 10))
-  fem <- rep('female/characters', 11)
-  m.maf = c(fem, maf)
-  dim(m.maf) <- c(11,2)
-   
   
-   all_edges = ends(graphNetwork, es = E(graphNetwork), names = T)
-   all_edges = as.data.frame(all_edges)
-   m.maf = as.data.frame(m.maf)
-   all_edges$x = paste(all_edges$V1, all_edges$V2)
-   m.maf$x = paste(m.maf$V2, m.maf$V1)
-   #common nodes between males and females?
-   #male primary nodes
-   mpn = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] %in% imm.coocs
-   #male female intersection
-   mfi = all_edges$x %in% m.maf$x
-   sum(mfi)
-  
-   
-   E(graphNetwork)$color <- ifelse(mtf == 2, adjustcolor('cornflowerblue', alpha.f = 0.4),
-                                   ifelse(mfi == TRUE, adjustcolor('darkolivegreen', alpha.f = 0.4),
-                                   ifelse(fto == TRUE, adjustcolor('darkolivegreen', alpha.f = 0.4),
-                                   ifelse(mpn == TRUE, adjustcolor('cornflowerblue', alpha.f = 0.4), adjustcolor('DarkGray', alpha.f = .4)))))
-   E(graphNetwork)$width <- ifelse(mtf == 2, 6, ifelse(fto == 1, 6, 2))
-   
-   #E(graphNetwork)$color <- ifelse(mfi == TRUE, adjustcolor('purple', alpha.f = 0.4), adjustcolor('DarkGray', alpha.f = .4))
-   
-   # also color edges according to their starting node
-  #edge.start <- ends(graphNetwork, es = E(graphNetwork), names = T)[,1]
-  #E(graphNetwork)$color <- V(graphNetwork)$color[edge.start]
-  #E(graphNetwork)$arrow.mode <- 0
+  # also color edges according to their starting node
+  #edge.start <- ends(subgraph, es = E(subgraph), names = F)[,1]
+  #E(subgraph)$color <- V(subgraph)$color[edge.start]
+  #E(subgraph)$arrow.mode <- 0
   
   # Set edges with radius
   E(graphNetwork)$curved <- 0.15 

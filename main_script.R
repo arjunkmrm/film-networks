@@ -153,7 +153,7 @@ anova(ancova.word)
 library(wordcloud)
 #male
 male.perm <- data.frame() #initialize
-  graph.m = grapher("male/characters", 50, token_filter2("noun", 1940, 2020, token.all)) #extract graph info
+  graph.m = grapher("male/characters", 20, token_filter2("noun", 1940, 2020, token.all)) #extract graph info
   gr.m <- graph.m[[3]] #pass graph object
   gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
   gr.m <- gr.m[1:22,] #filter 20 

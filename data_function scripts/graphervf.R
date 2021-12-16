@@ -1,6 +1,10 @@
 ##### function to create graphs #####
 #Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
 
+# numberOfCoocs = 15
+# toks = token_filter2("noun", 2000, 2020, token.all)
+# measure = 'LOGLIK'
+
 graphervf <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   #oppositeg = ifelse(coocTerm == 'male/characters', 'female/characters', 'male/characters')
   
@@ -104,30 +108,30 @@ graphervf <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   
   #imm.coocs
   #male and female
-  maf = intersect(fc2, male_coocs)
+  maf = intersect(fc2, mc2)
   #fam = intersect(mc2, female_coocs)
-  
+  intersect = intersect(male_coocs, female_coocs)
   #for edges #####
-  fem <- rep(oppositeg, length(maf))
-  m.maf = c(fem, maf)
-  dim(m.maf) <- c(length(maf),2)
-
-  all_edges = ends(graphNetwork, es = E(graphNetwork), names = T)
-  all_edges = as.data.frame(all_edges)
-  m.maf = as.data.frame(m.maf)
-  all_edges$x = paste(all_edges$V1, all_edges$V2)
-  m.maf$x = paste(m.maf$V2, m.maf$V1)
-  #common nodes between males and females?
-  #male primary nodes
-  mpn = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] %in% male_coocs
-  #male female intersection
-  mfi = all_edges$x %in% m.maf$x
-  sum(mfi)
+  # fem <- rep(oppositeg, length(maf))
+  # m.maf = c(fem, maf)
+  # dim(m.maf) <- c(length(maf),2)
+  # 
+  # all_edges = ends(graphNetwork, es = E(graphNetwork), names = T)
+  # all_edges = as.data.frame(all_edges)
+  # m.maf = as.data.frame(m.maf)
+  # all_edges$x = paste(all_edges$V1, all_edges$V2)
+  # m.maf$x = paste(m.maf$V2, m.maf$V1)
+  # #common nodes between males and females?
+  # #male primary nodes
+  # mpn = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] %in% male_coocs
+  # #male female intersection
+  # mfi = all_edges$x %in% m.maf$x
+  # sum(mfi)
   
   # Assign colors to nodes (search term blue, primary green, others orange)
   V(graphNetwork)$color <- ifelse(V(graphNetwork)$name == c('male/characters'), adjustcolor('cornflowerblue', alpha = 0.9),
                                   ifelse(V(graphNetwork)$name %in% c('female/characters'), adjustcolor('orange', alpha = 0.9),
-                                         ifelse(V(graphNetwork)$name %in% maf, adjustcolor('purple', alpha = 0.8),
+                                         ifelse(V(graphNetwork)$name %in% c(intersect, maf), adjustcolor('purple', alpha = 0.8),
                                   ifelse(V(graphNetwork)$name %in% male_coocs, adjustcolor('cornflowerblue', alpha = 0.8),
                                          ifelse(V(graphNetwork)$name %in% female_coocs, adjustcolor('orange', alpha = 0.9), adjustcolor('grey', alpha = 0.4))))))
   
@@ -163,12 +167,12 @@ graphervf <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   visIgraph(graphNetwork) 
   #visSave(graphNetwork, "male_graph.html", selfcontained = TRUE, background = "white")
   
-  log_df <- data.frame(names = names(coocs), loglik = coocs)
-  rownames(log_df) <- 1:nrow(log_df)
+  #log_df <- data.frame(names = names(coocs), loglik = coocs)
+  #rownames(log_df) <- 1:nrow(log_df)
   
   graph_list <- list()
   graph_list[[1]] <- graphNetwork #network object
-  graph_list[[2]] <- imm.coocs #names of co-occs (redundant)
-  graph_list[[3]] <- log_df #data frame of co-occs and significance
+  #graph_list[[2]] <- imm.coocs #names of co-occs (redundant)
+  #graph_list[[3]] <- log_df #data frame of co-occs and significance
   return(graph_list)
 }

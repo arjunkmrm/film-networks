@@ -27,6 +27,8 @@ token.all <- tokens_tolower(token.all) #convert all tokens to lower
 #sample based on min in a decade
 token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
 
+token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
+
 #create a token set with only generalized pos info
 pos_replace <- function(toks.replace){
   toks.replace <- toks.replace %>% 
@@ -244,8 +246,16 @@ male.perm <- data.frame() #initialize
   
   graphf
   source("graphervf.R")
- graph = graphervf(20, token_filter2("noun", 2000, 2020, token.all))
- visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
+  #token filter 2 is all except
+ graph = graphervf(15, token_filter2("all", 1940, 2020, token.all))
+ graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
+ graph_plot
+ visSave(graph_plot, 'complete_plot.html')
  visIgraph(graph[[1]])
+ 
+ 
+ graph = graphervf(15, token_filter3("all", 1940, 2020, token.all))
+ graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
+ graph_plot
  
  

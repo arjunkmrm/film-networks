@@ -36,6 +36,8 @@ pos_replace <- function(toks.replace){
   return(toks.replace)
 }
 token.pos <- pos_replace(token.all) 
+#convert tokens to all lower
+token.pos <- tokens_tolower(token.pos)
 
 #1. Find Probability of Verbs/Adj/Noun given male/female across decades
 
@@ -101,6 +103,47 @@ for(j in 0:7){ #for loop to run for each decade
   ancova.noun <- aov(p ~ year*gender, data = p_decdat[pos == "noun",])
   summary(ancova.noun)
   
+#2. PPMI verbs, nouns, adjs
+  all_ind <- data.frame() 
+  plot_class <- function(term){
+    all_ind <- data.frame() #initialise
+    #term <- "best/adj" #term to find PPMI for
+    #pos <- "adj" #pos of word 
+    #i = 0
+    for(i in 0 : 7){ #for loop to run across decades
+      j = 1940 + 10*i
+      male_ind = grapher("male/characters", 4 , token.pos, "MI")[[3]][] #get PPMI data for given decade
+      male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+      male_ind <- male_ind %>% filter(names == term) #filter term given
+      male_ind$year = j #attach year info
+      male_ind$gender = "male" #assign gender
+      
+      #same for females
+      j = 1940 + 10*i
+      female_ind = grapher("female/characters", 4 ,token.pos, "MI")[[3]][]
+      female_ind$rank = 1 : nrow(female_ind)
+      female_ind <- female_ind %>% filter(names == term)
+      female_ind$year = j
+      female_ind$gender = "female"
+      
+      #bind to overall data
+      all_ind <- rbind(all_ind, male_ind, female_ind)
+    }
+    print(all_ind)
+    #plot 
+    ggplot(all_ind, aes(x = year, y = loglik, color = gender)) +
+      geom_point(color = "black") + 
+      geom_line(size = 1) +
+      geom_smooth(method = "lm", se = TRUE, size = 1, aes(fill = gender), alpha = 0.1) + theme_minimal() +
+      ylab("Pointwise Mutual Information") + ggtitle(term) +
+      theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
+            legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
+            panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+  }
+  
+  plot_class('adj')
+  
+  
 #2. Individual words - PPMI across decades 
 
 plot_word <- function(term, pos){
@@ -109,7 +152,7 @@ all_ind <- data.frame() #initialise
 #pos <- "adj" #pos of word 
 for(i in 0 : 7){ #for loop to run across decades
   j = 1940 + 10*i
-  male_ind = grapher("male/characters", 10 ,token_filter(pos, j, token.all), "MI")[[3]][] #get PPMI data for given decade
+  male_ind = grapher("male/characters", 10 ,token_filter(pos, j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
   male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
   male_ind <- male_ind %>% filter(names == term) #filter term given
   male_ind$year = j #attach year info
@@ -117,7 +160,7 @@ for(i in 0 : 7){ #for loop to run across decades
   
   #same for females
   j = 1940 + 10*i
-  female_ind = grapher("female/characters", 10 ,token_filter(pos, j, token.all), "MI")[[3]][]
+  female_ind = grapher("female/characters", 10 ,token_filter(pos, j, token.all), "LOGLIK")[[3]][]
   female_ind$rank = 1 : nrow(female_ind)
   female_ind <- female_ind %>% filter(names == term)
   female_ind$year = j
@@ -132,14 +175,14 @@ ggplot(all_ind, aes(x = year, y = loglik, color = gender)) +
   geom_point(color = "black") + 
   geom_line(size = 1) +
   geom_smooth(method = "lm", se = TRUE, size = 1, aes(fill = gender), alpha = 0.1) + theme_minimal() +
-  ylab("Pointwise Mutual Information") + ggtitle(term) +
+  ylab("Loglikelihood") + ggtitle(term) +
   theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
         legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
         panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
 }
 
-plot_word('arrives/verb', 'verb')
-ggsave("arrives_verb.png", width = 6, height = 4)
+plot_word('corrupt/adj', 'adj')
+ggsave("corrupt_a.png", width = 6, height = 4)
 
 #check significance
 ancova.word <- lm(loglik~year*gender, data = all_ind)
@@ -246,6 +289,7 @@ male.perm <- data.frame() #initialize
   
   graphf
   source("graphervf.R")
+  source('grapherdemo.R')
   #token filter 2 is all except
  graph = graphervf(15, token_filter2("all", 1940, 2020, token.all))
  graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
@@ -254,8 +298,10 @@ male.perm <- data.frame() #initialize
  visIgraph(graph[[1]])
  
  
- graph = graphervf(15, token_filter3("all", 1940, 2020, token.all))
+ graph = grapherdemo(10, token_filter3("adj", 1940, 2020, token.all))
  graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
  graph_plot
+ graph[[2]]
+ graph[[3]]
  
  

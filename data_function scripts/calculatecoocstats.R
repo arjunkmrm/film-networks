@@ -15,7 +15,7 @@ calculateCoocStatistics <- function(coocTerm, binDTM, measure = "DICE") {
   coocCounts <- t(binDTM) %*% binDTM
   
   #retrieve numbers for statistic calculation
-  k <- nrow(binDTM)
+  k <- nrow(binDTM) #total number of sentences
   ki <- sum(binDTM[, coocTerm])
   kj <- colSums(binDTM)
   names(kj) <- colnames(binDTM)

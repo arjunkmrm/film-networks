@@ -112,7 +112,7 @@ for(j in 0:7){ #for loop to run for each decade
     #i = 0
     for(i in 0 : 7){ #for loop to run across decades
       j = 1940 + 10*i
-      male_ind = grapher("male/characters", 4 , token.pos, "MI")[[3]][] #get PPMI data for given decade
+      male_ind = grapher("male/characters", 4 , token_filter('all', j, token.pos), "MI")[[3]][] #get PPMI data for given decade
       male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
       male_ind <- male_ind %>% filter(names == term) #filter term given
       male_ind$year = j #attach year info
@@ -120,7 +120,7 @@ for(j in 0:7){ #for loop to run for each decade
       
       #same for females
       j = 1940 + 10*i
-      female_ind = grapher("female/characters", 4 ,token.pos, "MI")[[3]][]
+      female_ind = grapher("female/characters", 4 ,token_filter('all', j, token.pos), "MI")[[3]][]
       female_ind$rank = 1 : nrow(female_ind)
       female_ind <- female_ind %>% filter(names == term)
       female_ind$year = j
@@ -167,21 +167,22 @@ for(i in 0 : 7){ #for loop to run across decades
   female_ind$gender = "female"
 
   #bind to overall data
-  all_ind <- rbind(all_ind, male_ind, female_ind)
+  all_ind <- rbind(all_ind, female_ind)
 }
 
 #plot 
-ggplot(all_ind, aes(x = year, y = loglik, color = gender)) +
+ggplot(all_ind, aes(x = year, y = loglik)) +
   geom_point(color = "black") + 
   geom_line(size = 1) +
-  geom_smooth(method = "lm", se = TRUE, size = 1, aes(fill = gender), alpha = 0.1) + theme_minimal() +
+  geom_smooth(method = "lm", se = TRUE, size = 1, aes(fill = 'darkblue'), alpha = 0.1) + theme_minimal() +
   ylab("Loglikelihood") + ggtitle(term) +
   theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
         legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
-        panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3))
+        panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)) 
+  #facet_wrap(~ gender)
 }
 
-plot_word('corrupt/adj', 'adj')
+plot_word('attractive/adj', 'adj')
 ggsave("corrupt_a.png", width = 6, height = 4)
 
 #check significance
@@ -289,7 +290,7 @@ male.perm <- data.frame() #initialize
   
   graphf
   source("graphervf.R")
-  source('grapherdemo.R')
+  source('grapherdemo.R')       
   #token filter 2 is all except
  graph = graphervf(15, token_filter2("all", 1940, 2020, token.all))
  graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
@@ -298,10 +299,116 @@ male.perm <- data.frame() #initialize
  visIgraph(graph[[1]])
  
  
- graph = grapherdemo(10, token_filter3("adj", 1940, 2020, token.all))
+ source('grapherdemo.R')
+ graph = grapherdemo(20, token_filter2('all', 1940, 2020, token.all))
  graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
  graph_plot
- graph[[2]]
+ female_primary = graph[[2]]
+ male_primary = graph[[3]]
+ g = graph[[1]]
+ is_weighted(graph[[1]])
+ 
+ ?igraph_average_path_length_dijkstra()
+ 
+ #male
+ dmat = distances(graph[[1]], v=V(graph[[1]]), to='male/characters')
+ male_c = dmat[, 'male/characters'] 
+ male_c = sort(male_c, decreasing = T)[1:20]
+ 
+ #female
+ fmat = distances(graph[[1]], v=V(graph[[1]]), to='female/characters')
+ female_c = fmat[, 'female/characters'] 
+ female_c = sort(female_c, decreasing = T)[1:20]
+ allc = c(male_c, female_c)
+ allc = sort(allc, decreasing = T)
+ names(allc)
+ #random
+ mandf = intersect(names(female_c), names(male_c))
+ allc[names(allc) %in% mandf]
+ male_only = names(male_c[!names(male_c) %in% mandf])
+ female_only = names(female_c[!names(female_c) %in% mandf])
+ 
+ #network
+ visIgraph(g)
+ keep_nodes = names(c(allc, male_primary, female_primary))
+ keep_nodes = c(keep_nodes, 'male/characters')
+ remove_nodes = names(V(g))[!names(V(g)) %in% keep_nodes]
+ #g <- g - remove_nodes
+ 
+ #V(g)$color <- ifelse(V(g)$name == 'childhood/noun', 'red', 'grey')
+ visIgraph(g)
  graph[[3]]
  
+ #edge colors
+ all_edges = ends(g, es = E(g), names = T)
+ all_edges = as.data.frame(all_edges)
+ malet_bool <- all_edges$V2 %in% names(male_c)  
+ femalet_bool <- all_edges$V2 %in% names(female_c) 
+ E(g)$color <- ifelse(malet_bool == TRUE, adjustcolor('cornflowerblue'),
+                      ifelse(femalet_bool == TRUE, adjustcolor('orange'),
+                             'grey'))
+ 
+ edge.start <- ends(g, es = E(g), names = F)[,1]
+ E(g)$color <-  ifelse(malet_bool == TRUE, V(g)$color[edge.start], adjustcolor('grey', alpha=0.4))
+ 
+ mprimary_tropes = c('is/verb', 'friend/noun', 'takes/verb', 'tells/verb',
+                     'kill/verb', 'agent/noun', 'help/noun')
+ m_pcolor = paste('male/characters', mprimary_tropes)
+ all_edges$V3 = paste(all_edges$V1, all_edges$V2)
+ mp_bool = all_edges$V3 %in% m_pcolor
+ 
+ fprimary_tropes = c('love/noun', 'marriage/noun', 'relationship/noun', 'house/noun',
+                     'tells/verb')
+ f_pcolor = paste('female/characters', fprimary_tropes)
+ all_edges$V3 = paste(all_edges$V1, all_edges$V2)
+ fp_bool = all_edges$V3 %in% f_pcolor
+ 
+ E(g)$color <-  ifelse(mp_bool == TRUE, V(g)$color[edge.start], 
+                          ifelse(fp_bool == TRUE, V(g)$color[edge.start],
+                            ifelse(malet_bool == TRUE, V(g)$color[edge.start],
+                              ifelse(femalet_bool == TRUE, V(g)$color[edge.start],       
+                       adjustcolor('grey', alpha=0.4)))))
+
+
+V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerblue', alpha = 0.9),
+                                 ifelse(V(g)$name %in% c('female/characters'), adjustcolor('orange', alpha = 0.9),
+                                        ifelse(V(g)$name %in% c(intersect), adjustcolor('purple', alpha = 0.8),
+                                               ifelse(V(g)$name %in% male_coocs, adjustcolor('cornflowerblue', alpha = 0.8),
+                                                      ifelse(V(g)$name %in% female_coocs, adjustcolor('orange', alpha = 0.9),
+                                                             adjustcolor('grey', alpha = 0.8))))))
+ 
+ #V(g)$color <- when(V(g)$name %in% 'male/character', adjustcolor('red', alpha = 0.8))
+ visIgraph(g)
+ 
+ g_trim <- g - remove_nodes
+ visIgraph(g_trim)
+    
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ #ignore
+ ### Uni
+ source('grapher.r')
+ token.test = token.all %>% tokens_remove('female/characters')
+ graph = grapher('male/characters', 20, token_filter3("all", 1940, 2020, token.test))
+ graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
+ g = graph[[1]]
+ 
+ fem_rem = names(ego(g, order = 2, 'female/characters')[[1]])
+ mem = names(ego(g, order = 2, 'male/characters')[[1]])
+ mem = mem[mem != 'female/characters']
+ fem_rem = fem_rem[!fem_rem %in% mem]
+ g = g - fem_rem
+ visIgraph(g)
+ V(g)$color <- ifelse(V(g)$name == 'twin/adj', 'red', 'grey')
+# 
  

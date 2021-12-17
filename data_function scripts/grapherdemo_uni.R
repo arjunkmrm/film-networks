@@ -69,14 +69,14 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   return(list_graph)
   }
   male_list = graph_df('male/characters')
-  female_list = graph_df('female/characters')
+  #female_list = graph_df('female/characters')
   male = male_list[[2]]
   male_coocs = male_list[[1]]
   male_logs = male_list[[3]]
-  female = female_list[[2]]
-  female_coocs = female_list[[1]]
-  female_logs = female_list[[3]]
-  complete = rbind(male, female)
+  #female = female_list[[2]]
+  #female_coocs = female_list[[1]]
+  #female_logs = female_list[[3]]
+  complete = rbind(male)
   tail(complete)
   complete <- distinct(complete)
   nrow(complete)
@@ -102,26 +102,26 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   #male to female - not needed
   #ftm = rowSums(ends(graphNetwork, es = E(graphNetwork), names = T) == c('female/characters', 'male/characters'))
   #female primary nodes
-  fto = ends(graphNetwork, es = E(graphNetwork), names = T)[,1] == 'female/characters'
-  fto2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] == 'female/characters'
+  #fto = ends(graphNetwork, es = E(graphNetwork), names = T)[,1] == 'female/characters'
+  #fto2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] == 'female/characters'
   #male primary nodes
   mto = ends(graphNetwork, es = E(graphNetwork), names = T)[,1] == 'male/characters'
   mto2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,2] == 'male/characters'
   
    #female connections
-  fc = ends(graphNetwork, es = E(graphNetwork), names = T)[,2][as.logical(fto)]
-  fc2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,1][as.logical(fto2)]
+  #fc = ends(graphNetwork, es = E(graphNetwork), names = T)[,2][as.logical(fto)]
+  #fc2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,1][as.logical(fto2)]
   #male connections
   mc = ends(graphNetwork, es = E(graphNetwork), names = T)[,2][as.logical(mto)]
   mc2 = ends(graphNetwork, es = E(graphNetwork), names = T)[,1][as.logical(mto2)]
   
   #imm.coocs
   #male and female
-  main_cm = c(mc, mc2)
-  main_cf = c(fc, fc2)
-  maf = intersect(main_cm, main_cf)
+  #main_cm = c(mc, mc2)
+  #main_cf = c(fc, fc2)
+  #maf = intersect(main_cm, main_cf)
   #fam = intersect(mc2, female_coocs)
-  intersect = intersect(male_coocs, female_coocs)
+  #intersect = intersect(male_coocs, female_coocs)
   #for edges #####
   # fem <- rep(oppositeg, length(maf))
   # m.maf = c(fem, maf)

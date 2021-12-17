@@ -60,11 +60,13 @@ grapher <- function(coocTerm, numberOfCoocs, toks, measure = "LOGLIK"){
   
   # Create the graph object as undirected graph
   graphNetwork <- graph.data.frame(resultGraph, directed = F)
+  #set weights
+  E(graphNetwork)$weight = resultGraph$sig
   
   # Identification of all nodes with less than 2 edges
   verticesToRemove <- V(graphNetwork)[degree(graphNetwork) < 2]
   # These edges are removed from the graph
-  graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
+  #graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
   
   #for vertices #####
   #male to female - not needed

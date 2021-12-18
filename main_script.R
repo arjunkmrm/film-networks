@@ -167,14 +167,14 @@ for(i in 0 : 7){ #for loop to run across decades
   female_ind$gender = "female"
 
   #bind to overall data
-  all_ind <- rbind(all_ind, female_ind)
+  all_ind <- rbind(all_ind, male_ind)
 }
 
 #plot 
 ggplot(all_ind, aes(x = year, y = loglik)) +
   geom_point(color = "black") + 
   geom_line(size = 1) +
-  geom_smooth(method = "lm", se = TRUE, size = 1, aes(fill = 'darkblue'), alpha = 0.1) + theme_minimal() +
+  geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
   ylab("Loglikelihood") + ggtitle(term) +
   theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
         legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
@@ -183,7 +183,7 @@ ggplot(all_ind, aes(x = year, y = loglik)) +
 }
 
 plot_word('attractive/adj', 'adj')
-ggsave("corrupt_a.png", width = 6, height = 4)
+ggsave("attractive_am.png", width = 6, height = 4)
 
 #check significance
 ancova.word <- lm(loglik~year*gender, data = all_ind)
@@ -292,7 +292,7 @@ male.perm <- data.frame() #initialize
   source("graphervf.R")
   source('grapherdemo.R')       
   #token filter 2 is all except
- graph = graphervf(15, token_filter2("all", 1940, 2020, token.all))
+ graph = graphervf(15, token_filter2("noun", 1940, 2020, token.all))
  graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
  graph_plot
  visSave(graph_plot, 'complete_plot.html')
@@ -300,15 +300,14 @@ male.perm <- data.frame() #initialize
  
  
  source('grapherdemo.R')
- graph = grapherdemo(20, token_filter2('all', 1940, 2020, token.all))
- graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
- graph_plot
- female_primary = graph[[2]]
- male_primary = graph[[3]]
- g = graph[[1]]
+ graph = grapherdemo(20, token_filter3('adj', 1940, 1950, token.all))
+ #graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
+ #graph_plot
+ female_primary = graph[[2]] #20 female primary nodes
+ male_primary = graph[[3]] #20 male primary nodes
+ g = graph[[1]] #graph
  is_weighted(graph[[1]])
- 
- ?igraph_average_path_length_dijkstra()
+ visIgraph(g) %>% visNodes(font = list(size = 24))
  
  #male
  dmat = distances(graph[[1]], v=V(graph[[1]]), to='male/characters')
@@ -337,13 +336,15 @@ male.perm <- data.frame() #initialize
  
  #V(g)$color <- ifelse(V(g)$name == 'childhood/noun', 'red', 'grey')
  visIgraph(g)
- graph[[3]]
  
  #edge colors
  all_edges = ends(g, es = E(g), names = T)
  all_edges = as.data.frame(all_edges)
+ male_c = male_c[names(male_c != 'beach/noun')]
  malet_bool <- all_edges$V2 %in% names(male_c)  
+ all_edges$V2[all_edges$V2 %in% names(male_c)  ]
  femalet_bool <- all_edges$V2 %in% names(female_c) 
+ #mft_bool <- all_edges$V2 %in% names(mandf) 
  E(g)$color <- ifelse(malet_bool == TRUE, adjustcolor('cornflowerblue'),
                       ifelse(femalet_bool == TRUE, adjustcolor('orange'),
                              'grey'))
@@ -352,15 +353,17 @@ male.perm <- data.frame() #initialize
  E(g)$color <-  ifelse(malet_bool == TRUE, V(g)$color[edge.start], adjustcolor('grey', alpha=0.4))
  
  mprimary_tropes = c('is/verb', 'friend/noun', 'takes/verb', 'tells/verb',
-                     'kill/verb', 'agent/noun', 'help/noun')
+                     'kill/verb', 'agent/noun', 'help/noun', 
+                     'brother/noun', 'former/adj')
  m_pcolor = paste('male/characters', mprimary_tropes)
  all_edges$V3 = paste(all_edges$V1, all_edges$V2)
  mp_bool = all_edges$V3 %in% m_pcolor
  
- fprimary_tropes = c('love/noun', 'marriage/noun', 'relationship/noun', 'house/noun',
+ fprimary_tropes = c('love/noun', 'marriage/noun', 'relationship/noun',
                      'tells/verb')
  f_pcolor = paste('female/characters', fprimary_tropes)
  all_edges$V3 = paste(all_edges$V1, all_edges$V2)
+ all_edges$V1[all_edges$V2 == 'tells/verb']
  fp_bool = all_edges$V3 %in% f_pcolor
  
  E(g)$color <-  ifelse(mp_bool == TRUE, V(g)$color[edge.start], 
@@ -369,25 +372,139 @@ male.perm <- data.frame() #initialize
                               ifelse(femalet_bool == TRUE, V(g)$color[edge.start],       
                        adjustcolor('grey', alpha=0.4)))))
 
-
+ all_edges$V3[malet_bool]
+ 
 V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerblue', alpha = 0.9),
                                  ifelse(V(g)$name %in% c('female/characters'), adjustcolor('orange', alpha = 0.9),
-                                        ifelse(V(g)$name %in% c(intersect), adjustcolor('purple', alpha = 0.8),
-                                               ifelse(V(g)$name %in% male_coocs, adjustcolor('cornflowerblue', alpha = 0.8),
-                                                      ifelse(V(g)$name %in% female_coocs, adjustcolor('orange', alpha = 0.9),
-                                                             adjustcolor('grey', alpha = 0.8))))))
+                                        ifelse(V(g)$name %in% c(intersect(mprimary_tropes, fprimary_tropes)), adjustcolor('purple', alpha = 0.9),
+                                               ifelse(V(g)$name %in% mprimary_tropes, adjustcolor('cornflowerblue', alpha = 0.9),
+                                                      ifelse(V(g)$name %in% fprimary_tropes, adjustcolor('orange', alpha = 0.9),
+                                                             ifelse(V(g)$name %in% c(names(male_c), names(female_c)), adjustcolor('darkgrey', alpha = 0.9),
+                                                             adjustcolor('grey', alpha = 0.2)))))))
  
  #V(g)$color <- when(V(g)$name %in% 'male/character', adjustcolor('red', alpha = 0.8))
  visIgraph(g)
  
+ 
+
+ keep_nodes = names(c(allc, male_primary, female_primary))
+ keep_nodes = c(keep_nodes, 'male/characters', 'female/characters')
+ remove_nodes = names(V(g))[!names(V(g)) %in% keep_nodes]
+ 
+ 
+ 
  g_trim <- g - remove_nodes
- visIgraph(g_trim)
-    
+ visIgraph(g_trim) %>% visNodes(font = list(size = 26))
  
  
  
  
+ #### General + 1940 - 1970 #################################################
  
+ source('grapherdemo.R')
+ graph = grapherdemo(20, token_filter3('all', 1940, 1950, token.all)) #create graph
+ female_primary = graph[[2]] #20 female primary nodes
+ male_primary = graph[[3]] #20 male primary nodes
+ g = graph[[1]] #save graph as g
+ visIgraph(g) #display
+ 
+ #Top secondary co-occurences
+ #male
+ dmat = distances(graph[[1]], v=V(graph[[1]]), to='male/characters') #compute path weights
+ male_c = dmat[, 'male/characters'] #secondary to male
+ male_c = sort(male_c, decreasing = T)[1:20] #sort top 20
+ 
+ #female
+ fmat = distances(graph[[1]], v=V(graph[[1]]), to='female/characters') #compute path weights
+ female_c = fmat[, 'female/characters'] #secondary to male
+ female_c = sort(female_c, decreasing = T)[1:20] #sort top 20
+ 
+ #store all secondary
+ allc = c(male_c, female_c) 
+ allc = sort(allc, decreasing = T) #sort decreasing
+
+ #why?
+ mandf = intersect(names(female_c), names(male_c))
+ allc[names(allc) %in% mandf]
+ male_only = names(male_c[!names(male_c) %in% mandf])
+ female_only = names(female_c[!names(female_c) %in% mandf])
+ 
+ #edge colors
+ all_edges = ends(g, es = E(g), names = T) #store all edges
+ all_edges = as.data.frame(all_edges) #convert to dataframe
+ 
+ #check 
+ all_edges$V2[all_edges$V1 == 'female/characters']
+ #male_c = male_c[names(male_c != 'beach/noun')]
+ male.sec_bool <- all_edges$V2 %in% names(male_c)  #create bool of all male secondary co-oocs
+ female.sec_bool <- all_edges$V2 %in% names(female_c)  #create bool of all female secondary co-oocs
+  
+ # E(g)$color <- ifelse(malet_bool == TRUE, adjustcolor('cornflowerblue'),
+ #                      ifelse(femalet_bool == TRUE, adjustcolor('orange'),
+ #                             'grey'))
+ visIgraph(g) #display
+ 
+ #color only male.sec and female.sec edges based on the start edge color
+ edge.start <- ends(g, es = E(g), names = F)[,1]
+ # E(g)$color <-  ifelse(male.sec_bool == TRUE, V(g)$color[edge.start], 
+ #                       ifelse(female.sec_bool == TRUE, V(g)$color[edge.start],
+ #                       adjustcolor('grey', alpha=0.4)))
+ 
+ male_ps = intersect(all_edges$V1[male.sec_bool], names(male_primary))
+ female_ps = intersect(all_edges$V1[female.sec_bool], names(female_primary))
+ all_edges$V1[female.sec_bool]
+ 
+ #color only primary tropes that have a path
+ #mprimary_tropes = c('is/verb', 'friend/noun', 'takes/verb', 'tells/verb',
+                     'kill/verb', 'agent/noun', 'help/noun', 
+                     'brother/noun', 'former/adj')
+ mprimary_tropes = male_ps
+ mprimary_tropes = mprimary_tropes[mprimary_tropes != 'female/characters']
+ m_pcolor = paste('male/characters', mprimary_tropes)
+ all_edges$V3 = paste(all_edges$V1, all_edges$V2)
+ mp_bool = all_edges$V3 %in% m_pcolor
+ 
+ #fprimary_tropes = c('love/noun', 'marriage/noun', 'relationship/noun',
+                     'tells/verb')
+fprimary_tropes = female_ps
+ f_pcolor = paste('female/characters', fprimary_tropes)
+ all_edges$V3 = paste(all_edges$V1, all_edges$V2)
+ all_edges$V1[all_edges$V2 == 'tells/verb']
+ fp_bool = all_edges$V3 %in% f_pcolor
+ 
+ E(g)$color <-  adjustcolor('grey', alpha=0.9)
+ 
+ E(g)$color <-  ifelse(mp_bool == TRUE, V(g)$color[edge.start], 
+                       ifelse(fp_bool == TRUE, V(g)$color[edge.start],
+                              
+                              ifelse(male.sec_bool == TRUE, V(g)$color[edge.start],
+                                     ifelse(female.sec_bool == TRUE, V(g)$color[edge.start],       
+                                            adjustcolor('grey', alpha=0.4)))))
+ 
+ visIgraph(g)
+ all_edges$V3[malet_bool]
+ 
+ V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerblue', alpha = 0.9),
+                      ifelse(V(g)$name %in% c('female/characters'), adjustcolor('orange', alpha = 0.9),
+                             ifelse(V(g)$name %in% c(intersect(mprimary_tropes, fprimary_tropes)), adjustcolor('purple', alpha = 0.9),
+                                    ifelse(V(g)$name %in% mprimary_tropes, adjustcolor('cornflowerblue', alpha = 0.9),
+                                           ifelse(V(g)$name %in% fprimary_tropes, adjustcolor('orange', alpha = 0.9),
+                                                  ifelse(V(g)$name %in% c(names(male_c), names(female_c)), adjustcolor('darkgrey', alpha = 0.9),
+                                                         adjustcolor('grey', alpha = 0.2)))))))
+ 
+ #V(g)$color <- when(V(g)$name %in% 'male/character', adjustcolor('red', alpha = 0.8))
+ visIgraph(g)
+ 
+ 
+ 
+ keep_nodes = names(c(allc, male_primary, female_primary))
+ keep_nodes = c(keep_nodes, 'male/characters', 'female/characters')
+ remove_nodes = names(V(g))[!names(V(g)) %in% keep_nodes]
+ 
+ 
+ 
+ g_trim <- g - remove_nodes
+ visIgraph(g_trim) %>% visNodes(font = list(size = 26))
  
  
  
@@ -399,7 +516,7 @@ V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerb
  ### Uni
  source('grapher.r')
  token.test = token.all %>% tokens_remove('female/characters')
- graph = grapher('male/characters', 20, token_filter3("all", 1940, 2020, token.test))
+ graph = grapher('male/characters', 20, token_filter3("all", 1940, 1950, token.test))
  graph_plot = visIgraph(graph[[1]]) %>% visNodes(font = list(size = 28))
  g = graph[[1]]
  

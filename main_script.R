@@ -182,8 +182,8 @@ ggplot(all_ind, aes(x = year, y = loglik)) +
   #facet_wrap(~ gender)
 }
 
-plot_word('attractive/adj', 'adj')
-ggsave("attractive_am.png", width = 6, height = 4)
+plot_word('boss/noun', 'noun')
+ggsave("wedding_noun_female.png", width = 6, height = 4)
 
 #check significance
 ancova.word <- lm(loglik~year*gender, data = all_ind)
@@ -402,7 +402,7 @@ V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerb
  #### General + 1940 - 1970 #################################################
  
  source('grapherdemo.R')
- graph = grapherdemo(20, token_filter3('all', 1940, 1950, token.all)) #create graph
+ graph = grapherdemo(20, token_filter3('all', 2010, 2020, token.all)) #create graph
  female_primary = graph[[2]] #20 female primary nodes
  male_primary = graph[[3]] #20 male primary nodes
  g = graph[[1]] #save graph as g
@@ -507,7 +507,7 @@ fprimary_tropes = female_ps
  visIgraph(g_trim) %>% visNodes(font = list(size = 26))
  
  
- 
+ male_c
  
  
  

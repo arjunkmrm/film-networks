@@ -146,44 +146,54 @@ for(j in 0:7){ #for loop to run for each decade
   
 #2. Individual words - PPMI across decades 
 
-plot_word <- function(term, pos){
-all_ind <- data.frame() #initialise
-#term <- "best/adj" #term to find PPMI for
-#pos <- "adj" #pos of word 
+plot_word <- function(term1, term2, gender){
+male = data.frame()
 for(i in 0 : 7){ #for loop to run across decades
+  male_temp <- data.frame()
   j = 1940 + 10*i
-  male_ind = grapher("male/characters", 10 ,token_filter(pos, j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
-  male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
-  male_ind <- male_ind %>% filter(names == term) #filter term given
-  male_ind$year = j #attach year info
-  male_ind$gender = "male" #assign gender
+
+  male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+  #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+  male_temp <- male_temp %>% filter(names == term1) #filter term given
+  male_temp$year = j #attach year info
+  male_temp$gender = "male" #assign gender
+  names(male_temp)[2] = 'll1'
+  male_ind = male_temp
   
-  #same for females
-  j = 1940 + 10*i
-  female_ind = grapher("female/characters", 10 ,token_filter(pos, j, token.all), "LOGLIK")[[3]][]
-  female_ind$rank = 1 : nrow(female_ind)
-  female_ind <- female_ind %>% filter(names == term)
-  female_ind$year = j
-  female_ind$gender = "female"
+  male_temp = grapher(term1, 10, token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+  male_temp <- male_temp %>% filter(names == term2) #filter term given
+  names(male_temp)[2] = 'll2'
+  male_ind = cbind(male_temp, male_ind)
+  male = rbind(male, male_ind)
+  # #same for females
+  # j = 1940 + 10*i
+  # female_ind = grapher("female/characters", 10 ,token_filter(pos, j, token.all), "LOGLIK")[[3]][]
+  # female_ind$rank = 1 : nrow(female_ind)
+  # female_ind <- female_ind %>% filter(names == term)
+  # female_ind$year = j
+  # female_ind$gender = "female"
 
   #bind to overall data
-  all_ind <- rbind(all_ind, male_ind)
+  #all_ind <- ifelse(gender == 'male', rbind(all_ind, male_ind), 
+             #       rbind(all_ind, male_ind))
 }
+male$ll = male$ll1 + male$ll2
+male = male %>% select(year, ll)
 
 #plot 
-ggplot(all_ind, aes(x = year, y = loglik)) +
+ggplot(male, aes(x = year, y = ll)) +
   geom_point(color = "black") + 
   geom_line(size = 1) +
   geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
-  ylab("Loglikelihood") + ggtitle(term) +
+  ylab("Loglikelihood") + ggtitle(paste(gender, term1, term2, sep = '-')) +
   theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
         legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
         panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)) 
   #facet_wrap(~ gender)
 }
 
-plot_word('boss/noun', 'noun')
-ggsave("wedding_noun_female.png", width = 6, height = 4)
+plot_word('relationship/noun', 'romantic/adj', 'female')
+ggsave("relationship_romantic.png", width = 6, height = 4)
 
 #check significance
 ancova.word <- lm(loglik~year*gender, data = all_ind)
@@ -195,6 +205,41 @@ all_ind_fem <- all_ind %>% filter(gender == "female")
 ancova.word <- lm(loglik~year, data = all_ind_fem)
 summary(ancova.word)
 anova(ancova.word) 
+
+######### Individual words ############
+
+plot_word_single <- function(term, gender){
+  male = data.frame()
+  for(i in 0 : 7){ #for loop to run across decades
+    male_temp <- data.frame()
+    j = 1940 + 10*i
+    male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('adj', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+    #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+    male_temp <- male_temp %>% filter(names == term) #filter term given
+    male_temp$year = j #attach year info
+    male_temp$gender = "male" #assign gender
+    names(male_temp)[2] = 'll'
+    male_ind = male_temp
+    male = rbind(male, male_ind)
+  }
+  male = male %>% select(year, ll)
+  
+  #plot 
+  ggplot(male, aes(x = year, y = ll)) +
+    geom_point(color = "black") + 
+    geom_line(size = 1) +
+    geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
+    ylab("Loglikelihood") + ggtitle(paste(gender, term, sep = '-')) +
+    theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
+          legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)) 
+  #facet_wrap(~ gender)
+}
+
+plot_word_single('married/adj', 'female')
+ggsave("married_female.png", width = 6, height = 4)
+
+############################################################
 
 #3. bar plot, networks, word cloud - log likelihoods
 library(wordcloud)

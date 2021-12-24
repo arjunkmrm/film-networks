@@ -21,16 +21,18 @@ token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL,
 # toks.female <- token.all %>% 
 #   tokens_select(pattern = 'female/characters', selection = 'remove', padding = TRUE, window = 5)
 
-#gender = 'male'
+gender = 'male'
+nm = 10
+toks.all = token.all
+
 #DETECTING COMMUNITIES
-#toks.all = token.all
 #gender = 'female'
-detect_communities <- function(toks.all, gender = 'male', nn = 10){
+detect_communities <- function(toks.all, gender = 'male', nn = 10, min = 20){
   toks <- toks.all %>% 
      tokens_select(pattern = paste(gender, '/characters', sep = ''), selection = 'remove', padding = TRUE, window = 5)
 
   #filter to keep only words that occur at least 10 times
-dfm <-  toks %>% dfm() %>% dfm_trim(min_termfreq = 10)
+dfm <-  toks %>% dfm() %>% dfm_trim(min_termfreq = min)
 filtered = colnames(dfm)
 toks <- token.all %>% 
   tokens_select(pattern = filtered, selection = 'keep', padding = TRUE)
@@ -126,12 +128,19 @@ clusters = inner_join(nodes, top_ten)
 subgraph$community <- clusters$group
 #unique(subgraph$community)
 
+#color by community
+clust_obj = make_clusters(subgraph, membership = clusters$group)
+prettyColors <- c("darkorange3", "deepskyblue4", "darkolivegreen","darkorchid3", "firebrick3")
+communityColors <- prettyColors[membership(clust_obj)]
+
 # give our nodes some properties, incl scaling them by degree and coloring them by community
-V(subgraph)$size <- 5
+V(subgraph)$size <- 1
 V(subgraph)$frame.color <- "white"
-V(subgraph)$color <- subgraph$community
+#V(subgraph)$color <- subgraph$community
+V(subgraph)$color <- 'SkyBlue2'
 #V(male_subgraph)$label <- V(male_subgraph)$name
 V(subgraph)$label.cex <- 1.8
+V(subgraph)$label.color <- communityColors
 
 # also color edges according to their starting node
 #edge.start <- ends(subgraph, es = E(subgraph), names = F)[,1]
@@ -167,8 +176,9 @@ clust_obj = make_clusters(subgraph, membership = clusters$group)
 # layout <- layout_with_kk(male_subgraph, weights=weights)
 # plot(male_subgraph, layout=layout)
 
-prettyColors <- c("turquoise4", "azure4", "olivedrab","deeppink4", "blue")
-communityColors <- prettyColors[membership(clust_obj)]
+#colror by community
+#prettyColors <- c("turquoise4", "azure4", "olivedrab","deeppink4", "blue")
+#communityColors <- prettyColors[membership(clust_obj)]
 
 
 edge.weights <- function(community, network, weight.within = 100, weight.between = 1) {
@@ -178,10 +188,17 @@ edge.weights <- function(community, network, weight.within = 100, weight.between
 }
 E(subgraph)$weight <- edge.weights(clust_obj, subgraph)
 layout <- layout_with_fr(subgraph, weights=E(subgraph)$weight)
-plot(subgraph, layout=layout, col = communityColors)
+#plot(subgraph, layout=layout, col = communityColors)
+plot(subgraph, layout=layout, edge.color = adjustcolor('SkyBlue2', alpha.f = 0.1))
+#visIgraph(subgraph) %>% visIgraphLayout(layout = "layout_with_mds") %>% visNodes(size = 14)
+return(subgraph)
 }
 
-detect_communities(token.all, 'female', 10)
+subgraph = detect_communities(token.all, 'female', 10, 20)
+tkplot(subgraph)
+coords <- tkplot.getcoords(4)
+
+plot(subgraph, layout=coords, edge.color = adjustcolor('SkyBlue2', alpha.f = 0.1))
 
 #visIgraph(male_subgraph) %>% visIgraphLayout(layout = "layout_with_fr") %>% visNodes(size = 12)
 

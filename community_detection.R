@@ -194,7 +194,7 @@ plot(subgraph, layout=layout, edge.color = adjustcolor('SkyBlue2', alpha.f = 0.1
 return(subgraph)
 }
 
-subgraph = detect_communities(token.all, 'female', 10, 20)
+subgraph = detect_communities(token.all, 'male', 10, 20)
 tkplot(subgraph)
 coords <- tkplot.getcoords(4)
 

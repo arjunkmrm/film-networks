@@ -144,8 +144,11 @@ for(j in 0:7){ #for loop to run for each decade
   plot_class('adj')
   
   
-#2. Individual words - PPMI across decades 
-
+#2. double words - PPMI across decades 
+i = 0
+gender = 'female'
+term1 = 'relationship/noun'
+term2 = 'strained/adj'
 plot_word <- function(term1, term2, gender){
 male = data.frame()
 for(i in 0 : 7){ #for loop to run across decades
@@ -163,6 +166,7 @@ for(i in 0 : 7){ #for loop to run across decades
   male_temp = grapher(term1, 10, token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
   male_temp <- male_temp %>% filter(names == term2) #filter term given
   names(male_temp)[2] = 'll2'
+  male_temp$names = ifelse(is.na(male_temp$names), 'term2', male_temp$names)
   male_ind = cbind(male_temp, male_ind)
   male = rbind(male, male_ind)
   # #same for females
@@ -192,8 +196,8 @@ ggplot(male, aes(x = year, y = ll)) +
   #facet_wrap(~ gender)
 }
 
-plot_word('relationship/noun', 'romantic/adj', 'female')
-ggsave("relationship_romantic.png", width = 6, height = 4)
+plot_word('marriage/noun', 'proposal/noun', 'male')
+ggsave("_hostage.png", width = 6, height = 4)
 
 #check significance
 ancova.word <- lm(loglik~year*gender, data = all_ind)
@@ -213,7 +217,7 @@ plot_word_single <- function(term, gender){
   for(i in 0 : 7){ #for loop to run across decades
     male_temp <- data.frame()
     j = 1940 + 10*i
-    male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('adj', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+    male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
     #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
     male_temp <- male_temp %>% filter(names == term) #filter term given
     male_temp$year = j #attach year info

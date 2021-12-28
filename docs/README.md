@@ -473,13 +473,13 @@ graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all))
 
 ``` r
 g_demo = graph_demo[[1]]
-#visIgraph(g_demo)
-#plot(g_demo, vertex.label = NA, edge.curved=FALSE)
-#tkplot(g_demo)
-#coords_demo <- tkplot.getcoords(1)
-#save(coords_demo, file = 'coords_demo.RData')
+
+#tkplot(g_demo) #GUI to adjust coordinates of vertices
+#coords_demo <- tkplot.getcoords(1) #save coordinates to an object
+#save(coords_demo, file = 'coords_demo.RData') #save object
 load(file= 'coords_demo.RData')
-plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0, edge.curved=FALSE, layout = coords_demo)
+plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0, 
+     edge.curved=FALSE, layout = coords_demo)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
@@ -491,7 +491,11 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
  female_primary = graph[[2]] #20 female primary nodes
  male_primary = graph[[3]] #20 male primary nodes
  g = graph[[1]] #save graph as g
- visIgraph(g) #%>% visNodes(font = list(size = 26))  #display
+ #visIgraph(g) #%>% visNodes(font = list(size = 26))  #display
+ 
+plot(g, vertex.size = 3, vertex.label = NA, 
+     vertex.label.dist = 0, 
+     edge.curved=FALSE)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
@@ -503,12 +507,12 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
  #male
  dmat = distances(graph[[1]], v=V(graph[[1]]), to='male/characters') #compute path weights
  male_c = dmat[, 'male/characters'] #secondary to male
- male_c = sort(male_c, decreasing = T)[1:20] #sort top 20
+ male_c = sort(male_c, decreasing = T)[1:21] #sort top 20
  
  #female
  fmat = distances(graph[[1]], v=V(graph[[1]]), to='female/characters') #compute path weights
  female_c = fmat[, 'female/characters'] #secondary to male
- female_c = sort(female_c, decreasing = T)[1:20] #sort top 20
+ female_c = sort(female_c, decreasing = T)[1:21] #sort top 20
  
  #store all secondary
  allc = c(male_c, female_c) 
@@ -550,9 +554,9 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
     ##  [4] "is/verb"           "is/verb"           "kill/verb"        
     ##  [7] "takes/verb"        "love/noun"         "love/noun"        
     ## [10] "love/noun"         "love/noun"         "love/noun"        
-    ## [13] "love/noun"         "love/noun"         "relationship/noun"
-    ## [16] "relationship/noun" "relationship/noun" "wedding/noun"     
-    ## [19] "wedding/noun"      "wedding/noun"
+    ## [13] "love/noun"         "love/noun"         "love/noun"        
+    ## [16] "relationship/noun" "relationship/noun" "relationship/noun"
+    ## [19] "wedding/noun"      "wedding/noun"      "wedding/noun"
 
 ``` r
  #color only primary tropes that have a path
@@ -587,12 +591,7 @@ fprimary_tropes = female_ps
                                      ifelse(female.sec_bool == TRUE, V(g)$color[edge.start],       
                                             adjustcolor('grey', alpha=0.4)))))
  
- visIgraph(g)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
-
-``` r
+ #visIgraph(g)
  #all_edges$V3[malet_bool]
  
  V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerblue', alpha = 0.9),
@@ -601,18 +600,28 @@ fprimary_tropes = female_ps
                                     ifelse(V(g)$name %in% mprimary_tropes, adjustcolor('cornflowerblue', alpha = 0.9),
                                            ifelse(V(g)$name %in% fprimary_tropes, adjustcolor('orange', alpha = 0.9),
                                                   ifelse(V(g)$name %in% c(names(male_c), names(female_c)), adjustcolor('darkgrey', alpha = 0.9),
-                                                         adjustcolor('grey', alpha = 0.2)))))))
+                                                         adjustcolor('grey', alpha = 0.1)))))))
  
  #V(g)$color <- when(V(g)$name %in% 'male/character', adjustcolor('red', alpha = 0.8))
  #visIgraph(g)
- 
- 
+ plot(g, vertex.size = 3, vertex.label = NA, 
+     vertex.label.dist = 0, 
+     edge.curved=FALSE)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
  keep_nodes = names(c(allc, male_primary, female_primary))
  keep_nodes = c(keep_nodes, 'male/characters', 'female/characters')
  remove_nodes = names(V(g))[!names(V(g)) %in% keep_nodes]
  
  g_trim <- g - remove_nodes
- visIgraph(g_trim) %>% visNodes(font = list(size = 26))
+# visIgraph(g_trim) %>% visNodes(font = list(size = 26))
+ 
+  plot(g_trim, vertex.size = 3, vertex.label.cex = 0.6, 
+     vertex.label.dist = 0, 
+     edge.curved=FALSE)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->

@@ -1,23 +1,9 @@
----
-title: "Film Networks"
-output: 
-  github_document:
-    dev: jpeg
-    toc: true
-    toc_depth: 2
-
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-    #theme: united
-    #highlight: tango
-```
+Film Networks
+================
 
 #### Load Libraries, function scripts and data
 
-```{r, message=FALSE}
-
+``` r
 library(tidyverse) 
 library(quanteda) #for text cleaning
 library(igraph) #for creating graphs
@@ -35,15 +21,17 @@ load("token.all.RData")
 
 First I retrieved movie plots from Wikipedia using the rvest package.
 
-```{r, message = FALSE}
+``` r
 library(rvest)
 ```
 
 #### Function to retrieve movie plots from Wikipedia
 
-I wrote a function to retrieve 'n' number of plots for each year across a specified decade. I made the function return a string of plots for the entire decade.
+I wrote a function to retrieve ‘n’ number of plots for each year across
+a specified decade. I made the function return a string of plots for the
+entire decade.
 
-```{r, eval = FALSE}
+``` r
 plot_scraper <- function(decade = 1940, n = 200){ #declare function
   s <- character() #initialize string to store plots
   for(j in 0 : 9){ #for loop to run for 10 years in decade
@@ -99,16 +87,20 @@ plot_scraper <- function(decade = 1940, n = 200){ #declare function
   }
   return(s)
 }
-
 ```
 
 #### Function to tokenize extracted plots
 
-I also wrote a function to tokenise a given string with information about the part of speech of each word using the spacy library. Additionally I also used the genderizeR package to classify character names to their genders. Using this information, I converted all male character names to one single category and all female character names to a single category.
+I also wrote a function to tokenise a given string with information
+about the part of speech of each word using the spacy library.
+Additionally I also used the genderizeR package to classify character
+names to their genders. Using this information, I converted all male
+character names to one single category and all female character names to
+a single category.
 
-```{r, eval = FALSE}
+``` r
 #connect your python to the environment where you installed spacy
-reticulate::use_virtualenv("~/spacynlp-env", required = TRUE)	
+reticulate::use_virtualenv("~/spacynlp-env", required = TRUE)   
 reticulate::py_config() #check whether configuration is right
 
 #load libraries
@@ -174,15 +166,15 @@ film_tokenizer <- function(plot_string, metadata){ #declare function
   toks.all$decade = docvars_complete #assign decade to tokens
   return(toks.all)
 }
-
 ```
 
 #### Using the functions to create dataset for analysis
 
-I created the dataset for my analysis using the two functions above. First I used the plot scraper function to extract movie plots from all decades.
+I created the dataset for my analysis using the two functions above.
+First I used the plot scraper function to extract movie plots from all
+decades.
 
-```{r, eval = FALSE}
-
+``` r
 #scrape all plots across all decades
 s_all.i <- character() #declare string to hold all plot info
 year_plots <- data.frame() #declare data frame to hold info on number of plots scraped per year
@@ -196,41 +188,60 @@ for(i in seq(from=1940, to=2010, by=10)){ #run for loop to get each decade from 
   year_plots <- rbind(year_plots, year_plots.temp) #bind to overall data for plots/decade info
 }
 s_docvars <- rep(year_plots.final$year, times = year_plots.final$times) #create docvars to use for tokenizing (year info for each plot)
-
 ```
 
-After extracting all the movie plots, I used the film tokenizer function to tokenize the movie plots.
+After extracting all the movie plots, I used the film tokenizer function
+to tokenize the movie plots.
 
-```{r, eval = FALSE}
-
+``` r
 #tokenise data
 token.all <- film_tokenizer(s_all.i, s_docvars)
-
 ```
 
 A look at a sample of the final dataset
 
-```{r}
+``` r
 head(token.all, 5)
 ```
 
+    ## Tokens consisting of 5 documents and 1 docvar.
+    ## text1.1 :
+    ## [1] "father/NOUN"     "Male/CHARACTERS" "Male/CHARACTERS" "joins/VERB"     
+    ## [5] "promised/VERB"   "land/NOUN"      
+    ## 
+    ## text1.2 :
+    ##  [1] "Male/CHARACTERS" "learns/VERB"     "father/NOUN"     "died/VERB"      
+    ##  [5] "military/ADJ"    "expedition/NOUN" "consoled/VERB"   "schoolmate/NOUN"
+    ##  [9] "friend/NOUN"     "Male/CHARACTERS" "Male/CHARACTERS"
+    ## 
+    ## text1.3 :
+    ## [1] "Male/CHARACTERS"   "adult/NOUN"        "accomplished/ADJ" 
+    ## [4] "backwoodsman/NOUN" "sells/VERB"        "family/NOUN"      
+    ## [7] "farm/NOUN"         "order/NOUN"        "settle/VERB"      
+    ## 
+    ## text1.4 :
+    ##  [1] "saying/VERB"     "Male/CHARACTERS" "played/VERB"     "adult/NOUN"     
+    ##  [5] "Male/CHARACTERS" "Male/CHARACTERS" "tricked/VERB"    "meeting/VERB"   
+    ##  [9] "several/ADJ"     "members/NOUN"    "high/ADJ"        "society/NOUN"   
+    ## [ ... and 10 more ]
+    ## 
+    ## text1.5 :
+    ## [1] "snub/VERB"       "discover/VERB"   "common/ADJ"      "farmer/NOUN"    
+    ## [5] "landed/ADJ"      "gentlemen/NOUN"  "Male/CHARACTERS" "implied/VERB"
 
-```{r}
-
+``` r
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
 token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
-
-
-
 ```
 
 #### Exploratory analysis
 
-Since the data obtained is unequal for each decade due to some inherent factors, I wanted to check how the certain parameters are distributed acrosst he decades.
+Since the data obtained is unequal for each decade due to some inherent
+factors, I wanted to check how the certain parameters are distributed
+acrosst he decades.
 
-```{r, message = FALSE}
-
+``` r
 #plot the number of movies in each decade
 sents_df = data.frame(decade = as.character(), 
                        n_sents = as.numeric())
@@ -245,7 +256,11 @@ ggplot(sents_df, aes(x = decade, n_sents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
   theme_linedraw() + ylab('no. of sentences')
+```
 
+![](README_files/figure-gfm/unnamed-chunk-9-1.jpeg)<!-- -->
+
+``` r
 #plot number of words per sentence across decades
 words_df = data.frame(decade = as.character(), 
                        n_words = as.numeric())
@@ -262,25 +277,22 @@ ggplot(words_df, aes(x = decade, wordspsents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
   theme_linedraw() + ylab('words per sentence')
-
 ```
 
-```{r, eval = FALSE}
+![](README_files/figure-gfm/unnamed-chunk-9-2.jpeg)<!-- -->
 
+``` r
 set.seed(42) #for replication
 #UPDATE - general version
 #sample based on min in a decade
 token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
-
-
 ```
 
 ### Graph Construction
 
 #### Function to create co-occurence network using a given set of tokenised text
 
-```{r, eval = FALSE}
-
+``` r
 grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   #oppositeg = ifelse(coocTerm == 'male/characters', 'female/characters', 'male/characters')
   #coocTerm = 'male/characters'
@@ -425,35 +437,44 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   graph_list[[3]] <- male_logs #data frame of co-occs and significance
   return(graph_list)
 }
-
 ```
 
-```{r}
-
+``` r
 #add shiny toggle secondary, shiny toggle nodes
 graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all)) 
+```
+
+    ## Loading required package: Matrix
+
+    ## 
+    ## Attaching package: 'Matrix'
+
+    ## The following objects are masked from 'package:tidyr':
+    ## 
+    ##     expand, pack, unpack
+
+``` r
 g_demo = graph_demo[[1]]
 visIgraph(g_demo)
-
 ```
+
+![](README_files/figure-gfm/unnamed-chunk-12-1.jpeg)<!-- -->
 
 ### Complete Graph
 
-```{r}
-
+``` r
 graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create graph
  female_primary = graph[[2]] #20 female primary nodes
  male_primary = graph[[3]] #20 male primary nodes
  g = graph[[1]] #save graph as g
  visIgraph(g) #%>% visNodes(font = list(size = 26))  #display
-
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-13-1.jpeg)<!-- -->
 
 ### Significant Tropes in the Network
 
-```{r}
-
+``` r
 #Top secondary co-occurences
  #male
  dmat = distances(graph[[1]], v=V(graph[[1]]), to='male/characters') #compute path weights
@@ -475,6 +496,18 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
  
  #check 
  all_edges$V2[all_edges$V1 == 'female/characters']
+```
+
+    ##  [1] "daughter/noun"     "sister/noun"       "love/noun"        
+    ##  [4] "mother/noun"       "husband/noun"      "relationship/noun"
+    ##  [7] "affair/noun"       "house/noun"        "marriage/noun"    
+    ## [10] "girl/noun"         "marry/verb"        "woman/noun"       
+    ## [13] "pregnant/adj"      "wedding/noun"      "married/verb"     
+    ## [16] "love/noun"         "mother/noun"       "relationship/noun"
+    ## [19] "affair/noun"       "marriage/noun"     "girl/noun"        
+    ## [22] "woman/noun"        "pregnant/adj"      "wedding/noun"
+
+``` r
  #male_c = male_c[names(male_c != 'beach/noun')]
  male.sec_bool <- all_edges$V2 %in% names(male_c)  #create bool of all male secondary co-oocs
  female.sec_bool <- all_edges$V2 %in% names(female_c)  #create bool of all female secondary co-oocs
@@ -487,7 +520,17 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
  male_ps = intersect(all_edges$V1[male.sec_bool], names(male_primary))
  female_ps = intersect(all_edges$V1[female.sec_bool], names(female_primary))
  all_edges$V1[female.sec_bool]
- 
+```
+
+    ##  [1] "friend/noun"       "friend/noun"       "is/verb"          
+    ##  [4] "is/verb"           "is/verb"           "kill/verb"        
+    ##  [7] "takes/verb"        "love/noun"         "love/noun"        
+    ## [10] "love/noun"         "love/noun"         "love/noun"        
+    ## [13] "love/noun"         "love/noun"         "relationship/noun"
+    ## [16] "relationship/noun" "relationship/noun" "wedding/noun"     
+    ## [19] "wedding/noun"      "wedding/noun"
+
+``` r
  #color only primary tropes that have a path
  #mprimary_tropes = c('is/verb', 'friend/noun', 'takes/verb', 'tells/verb',
       #               'kill/verb', 'agent/noun', 'help/noun', 
@@ -504,6 +547,11 @@ fprimary_tropes = female_ps
  f_pcolor = paste('female/characters', fprimary_tropes)
  all_edges$V3 = paste(all_edges$V1, all_edges$V2)
  all_edges$V1[all_edges$V2 == 'tells/verb']
+```
+
+    ## [1] "male/characters" "male/characters"
+
+``` r
  fp_bool = all_edges$V3 %in% f_pcolor
  
  E(g)$color <-  adjustcolor('grey', alpha=0.9)
@@ -516,6 +564,11 @@ fprimary_tropes = female_ps
                                             adjustcolor('grey', alpha=0.4)))))
  
  visIgraph(g)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-14-1.jpeg)<!-- -->
+
+``` r
  #all_edges$V3[malet_bool]
  
  V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerblue', alpha = 0.9),
@@ -536,6 +589,6 @@ fprimary_tropes = female_ps
  
  g_trim <- g - remove_nodes
  visIgraph(g_trim) %>% visNodes(font = list(size = 26))
-
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-14-2.jpeg)<!-- -->

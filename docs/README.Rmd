@@ -458,7 +458,7 @@ plot(g, vertex.size = 3, vertex.label = NA,
 
 ## Significant Tropes in the Network
 
-```{r, fig.width = 5, fig.height = 4, dpi= 300}
+```{r, fig.width = 8, fig.height = 6, dpi= 300}
 
 #Top secondary co-occurences
  #male

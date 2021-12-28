@@ -430,7 +430,8 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
 #add shiny toggle secondary, shiny toggle nodes
 graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all)) 
 g_demo = graph_demo[[1]]
-visIgraph(g_demo)
+#visIgraph(g_demo)
+plot(g_demo)
 
 ```
 

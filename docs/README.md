@@ -1,7 +1,27 @@
 Film Networks
 ================
 
-#### Load Libraries, function scripts and data
+-   [The dataset](#the-dataset)
+    -   [Load Libraries, function scripts and
+        data](#load-libraries-function-scripts-and-data)
+    -   [Function to retrieve movie plots from
+        Wikipedia](#function-to-retrieve-movie-plots-from-wikipedia)
+    -   [Function to tokenize extracted
+        plots](#function-to-tokenize-extracted-plots)
+    -   [Using the functions to create dataset for
+        analysis](#using-the-functions-to-create-dataset-for-analysis)
+-   [Exploratory analysis](#exploratory-analysis)
+-   [Graph Construction](#graph-construction)
+    -   [Function to create co-occurence network using a given set of
+        tokenised
+        text](#function-to-create-co-occurence-network-using-a-given-set-of-tokenised-text)
+    -   [Complete Graph](#complete-graph)
+    -   [Significant Tropes in the
+        Network](#significant-tropes-in-the-network)
+
+# The dataset
+
+## Load Libraries, function scripts and data
 
 ``` r
 library(tidyverse) 
@@ -17,15 +37,13 @@ source("token_filter.R") #filter tokens
 load("token.all.RData")
 ```
 
-### The dataset
+## Function to retrieve movie plots from Wikipedia
 
 First I retrieved movie plots from Wikipedia using the rvest package.
 
 ``` r
 library(rvest)
 ```
-
-#### Function to retrieve movie plots from Wikipedia
 
 I wrote a function to retrieve ‘n’ number of plots for each year across
 a specified decade. I made the function return a string of plots for the
@@ -89,7 +107,7 @@ plot_scraper <- function(decade = 1940, n = 200){ #declare function
 }
 ```
 
-#### Function to tokenize extracted plots
+## Function to tokenize extracted plots
 
 I also wrote a function to tokenise a given string with information
 about the part of speech of each word using the spacy library.
@@ -168,7 +186,7 @@ film_tokenizer <- function(plot_string, metadata){ #declare function
 }
 ```
 
-#### Using the functions to create dataset for analysis
+## Using the functions to create dataset for analysis
 
 I created the dataset for my analysis using the two functions above.
 First I used the plot scraper function to extract movie plots from all
@@ -235,7 +253,7 @@ token.all <- tokens_tolower(token.all) #convert all tokens to lower
 token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
 ```
 
-#### Exploratory analysis
+# Exploratory analysis
 
 Since the data obtained is unequal for each decade due to some inherent
 factors, I wanted to check how the certain parameters are distributed
@@ -288,9 +306,9 @@ set.seed(42) #for replication
 token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
 ```
 
-### Graph Construction
+# Graph Construction
 
-#### Function to create co-occurence network using a given set of tokenised text
+## Function to create co-occurence network using a given set of tokenised text
 
 ``` r
 grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
@@ -460,7 +478,7 @@ visIgraph(g_demo)
 
 ![](README_files/figure-gfm/unnamed-chunk-12-1.jpeg)<!-- -->
 
-### Complete Graph
+## Complete Graph
 
 ``` r
 graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create graph
@@ -472,7 +490,7 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
 
 ![](README_files/figure-gfm/unnamed-chunk-13-1.jpeg)<!-- -->
 
-### Significant Tropes in the Network
+## Significant Tropes in the Network
 
 ``` r
 #Top secondary co-occurences

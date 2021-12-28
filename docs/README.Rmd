@@ -2,7 +2,7 @@
 title: "Film Networks"
 output: 
   github_document:
-    dev: jpeg
+    dev: png
     toc: true
 ---
 
@@ -425,18 +425,18 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
 
 ```
 
-```{r}
+```{r, fig.width = 5, fig.height = 5, dpi= 300}
 
 #add shiny toggle secondary, shiny toggle nodes
 graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all)) 
 g_demo = graph_demo[[1]]
 #visIgraph(g_demo)
-plot(g_demo, vertex.label = NA, edge.curved=FALSE)
+#plot(g_demo, vertex.label = NA, edge.curved=FALSE)
 #tkplot(g_demo)
 #coords_demo <- tkplot.getcoords(1)
 #save(coords_demo, file = 'coords_demo.RData')
 load(file= 'coords_demo.RData')
-plot(g_demo, vertex.label.cex = 0.6, edge.curved=FALSE, layout = coords_demo)
+plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0, edge.curved=FALSE, layout = coords_demo)
 ```
 
 ## Complete Graph

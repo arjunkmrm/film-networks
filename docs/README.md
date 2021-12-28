@@ -473,7 +473,8 @@ graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all))
 
 ``` r
 g_demo = graph_demo[[1]]
-visIgraph(g_demo)
+#visIgraph(g_demo)
+plot(g_demo)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-12-1.jpeg)<!-- -->

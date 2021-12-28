@@ -619,7 +619,7 @@ fprimary_tropes = female_ps
  g_trim <- g - remove_nodes
 # visIgraph(g_trim) %>% visNodes(font = list(size = 26))
  
-  plot(g_trim, vertex.size = 3, vertex.label.cex = 0.6, 
+  plot(g_trim, vertex.size = 3, vertex.label.cex = 0.3, 
      vertex.label.dist = 0, 
      edge.curved=FALSE)
 ```

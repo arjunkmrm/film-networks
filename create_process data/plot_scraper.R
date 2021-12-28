@@ -3,9 +3,8 @@
 # extracts film plots over the entire decade
 # returns string of extracted plots
 
-s <- character() #initialize string to store plots
-
 plot_scraper <- function(decade = 1940, n = 200){ #declare function
+  s <- character() #initialize string to store plots
   for(j in 0 : 9){ #for loop to run for 10 years in decade
     year_full = decade + j #year initialized to decade start in main script
     print(year_full)

@@ -1,10 +1,5 @@
 ##### function to create graphs #####
 #Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
-
-  numberOfCoocs = 10
-  toks = token_filter3("noun", 1940, 2020, token.all)
-  measure = 'LOGLIK'
-
 grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   #oppositeg = ifelse(coocTerm == 'male/characters', 'female/characters', 'male/characters')
   #coocTerm = 'male/characters'

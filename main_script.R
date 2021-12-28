@@ -23,11 +23,12 @@ source("token_filter.R") #filter tokens
 load("token.all.RData")
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
+token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
 
 #sample based on min in a decade
 token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
 
-token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
+
 
 #create a token set with only generalized pos info
 pos_replace <- function(toks.replace){
@@ -240,8 +241,8 @@ plot_word_single <- function(term, gender){
   #facet_wrap(~ gender)
 }
 
-plot_word_single('married/adj', 'female')
-ggsave("married_female.png", width = 6, height = 4)
+plot_word_single('killed/verb', 'male')
+ggsave("killed_verb_male.png", width = 6, height = 4)
 
 ############################################################
 
@@ -451,11 +452,77 @@ V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerb
  #### General + 1940 - 1970 #################################################
  
  source('grapherdemo.R')
- graph = grapherdemo(20, token_filter3('all', 2010, 2020, token.all)) #create graph
+ graph = grapherdemo(21, token_filter3('adj', 1940, 2020, token.all)) #create graph
  female_primary = graph[[2]] #20 female primary nodes
  male_primary = graph[[3]] #20 male primary nodes
  g = graph[[1]] #save graph as g
- visIgraph(g) #display
+ visIgraph(g) #%>% visNodes(font = list(size = 26))  #display
+ 
+ #pie chart - nouns ############## 
+ male_nouns = data.frame(role = c('Blood Relatives', 'Romantic Relationship', 'Career', 'Other'), 
+                         times = c(3, 3, 10, 4))
+ male_nouns
+ mp <- ggplot(male_nouns, aes(x = '', y = times, fill = role)) +
+       geom_bar(width = 1, stat = 'identity') +
+       coord_polar('y', start = 0) + scale_fill_manual(values = c('darkolivegreen', "deepskyblue", "mediumorchid4", "darkorange")) +
+       theme_minimal()
+ mp
+ 
+ female_nouns = data.frame(role = c('Blood Relatives', 'Romantic Relationship', 'Career', 'Other'), 
+                           times = c(3, 10, 2, 5))
+ female_nouns
+ fp <- ggplot(female_nouns, aes(x = '', y = times, fill = role)) +
+   geom_bar(width = 1, stat = 'identity') +
+   coord_polar('y', start = 0) + scale_fill_manual(values = c('darkolivegreen', "deepskyblue", "mediumorchid4", "darkorange")) +
+   theme_minimal()
+ fp
+ ggsave("female_noun_pie.png", width = 6, height = 4)
+ #pie chart - verbs
+ male_verbs = data.frame(action = c('Romance', 'Violence', 'Other'), 
+                         times = c(0, 2, 18))
+ male_verbs
+ mvp <- ggplot(male_verbs, aes(x = '', y = times, fill = action)) +
+   geom_bar(width = 1, stat = 'identity') +
+   coord_polar('y', start = 0) + scale_fill_manual(values = c('darkolivegreen', "deepskyblue", "darkorange")) +
+   theme_minimal()
+ mvp
+ ggsave("male_verb_pie.png", width = 6, height = 4)
+ 
+ female_verbs = data.frame(action = c('Romance', 'Violence', 'Other'), 
+                           times = c(8, 0, 12))
+ female_verbs
+ fvp <- ggplot(female_verbs, aes(x = '', y = times, fill = action)) +
+   geom_bar(width = 1, stat = 'identity') +
+   coord_polar('y', start = 0) + scale_fill_manual(values = c('darkolivegreen', "deepskyblue", "mediumorchid4", "darkorange")) +
+   theme_minimal()
+ fvp
+ ggsave("female_verb_pie.png", width = 6, height = 4)
+ #pie chart - adj
+ 
+ male_adj = data.frame(attribute = c('Romantic and Physical', 'Competence and Personality'), 
+                         times = c(3, 17))
+ male_adj
+ map <- ggplot(male_adj, aes(x = '', y = times, fill = attribute)) +
+   geom_bar(width = 1, stat = 'identity') +
+   coord_polar('y', start = 0) + scale_fill_manual(values = c("deepskyblue", "darkorange")) +
+   theme_minimal()
+ map
+ ggsave("male_adj_pie.png", width = 6, height = 4)
+ 
+ female_adj = data.frame(attribute = c('Romantic and Physical', 'Competence and Personality'), 
+                         times = c(9, 11))
+ female_adj
+ fap <- ggplot(female_adj, aes(x = '', y = times, fill = attribute)) +
+   geom_bar(width = 1, stat = 'identity') +
+   coord_polar('y', start = 0) + scale_fill_manual(values = c("deepskyblue", "darkorange")) +
+   theme_minimal()
+ fap
+ ggsave("female_adj_pie.png", width = 6, height = 4)
+ ###########
+ 
+ # rem_nodes = names(V(g))[(!names(V(g)) %in% c(names(male_primary), names(female_primary)))]
+ # gp = g - rem_nodes
+ # visIgraph(gp)
  
  #Top secondary co-occurences
  #male
@@ -505,8 +572,8 @@ V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerb
  
  #color only primary tropes that have a path
  #mprimary_tropes = c('is/verb', 'friend/noun', 'takes/verb', 'tells/verb',
-                     'kill/verb', 'agent/noun', 'help/noun', 
-                     'brother/noun', 'former/adj')
+      #               'kill/verb', 'agent/noun', 'help/noun', 
+      #               'brother/noun', 'former/adj')
  mprimary_tropes = male_ps
  mprimary_tropes = mprimary_tropes[mprimary_tropes != 'female/characters']
  m_pcolor = paste('male/characters', mprimary_tropes)
@@ -514,7 +581,7 @@ V(g)$color <- ifelse(V(g)$name == c('male/characters'), adjustcolor('cornflowerb
  mp_bool = all_edges$V3 %in% m_pcolor
  
  #fprimary_tropes = c('love/noun', 'marriage/noun', 'relationship/noun',
-                     'tells/verb')
+      #               'tells/verb')
 fprimary_tropes = female_ps
  f_pcolor = paste('female/characters', fprimary_tropes)
  all_edges$V3 = paste(all_edges$V1, all_edges$V2)

@@ -2,6 +2,7 @@
 title: "Film Simple"
 output: 
   github_document:
+    dev: jpeg
     toc: true
     toc_depth: 2
 

@@ -1,7 +1,7 @@
 ---
 title: "Film Simple"
 output: 
-  html_document:
+  rmarkdown::github_document
     theme: united
     highlight: tango
 ---

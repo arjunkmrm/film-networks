@@ -661,7 +661,7 @@ female_np$gender = 'female'
 ggplot(female_np, aes(x = reorder(word, llr), y = llr)) +
   geom_bar(stat = 'identity', fill = 'darkorange3', 
            alpha = 0.7, color = 'black') + coord_flip() +
-           xlab('word') + ylab('loglikelihood ratio')
+           xlab('word') + ylab('loglikelihood ratio') + theme_linedraw()
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->

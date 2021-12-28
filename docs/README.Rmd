@@ -563,7 +563,7 @@ fprimary_tropes = female_ps
 
 ## Common Roles
 
-```{r, fig.width = 4, fig.height = 4, dpi= 300}
+```{r, fig.width = 7, fig.height = 3.5, dpi= 300}
 
 graph = grapherdemo(21, token_filter3('noun', 1940, 2020, token.all))
 female_primary = graph[[2]] #20 female primary nodes
@@ -583,7 +583,7 @@ ggplot(male_np, aes(x = reorder(word, llr), y = llr)) +
 
 ```
 
-```{r, fig.width = 4, fig.height = 4, dpi= 300}
+```{r, fig.width = 7, fig.height = 3.5, dpi= 300}
 
 female_primary = female_primary[names(female_primary) != 'male/characters']
 female_primary = female_primary[1:20]
@@ -593,7 +593,7 @@ female_np$gender = 'female'
 ggplot(female_np, aes(x = reorder(word, llr), y = llr)) +
   geom_bar(stat = 'identity', fill = 'darkorange3', 
            alpha = 0.7, color = 'black') + coord_flip() +
-           xlab('word') + ylab('loglikelihood ratio')
+           xlab('word') + ylab('loglikelihood ratio') + theme_linedraw()
 
 #ll_np = rbind(male_np, female_np)
 

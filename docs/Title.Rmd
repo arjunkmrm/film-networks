@@ -1,13 +1,16 @@
 ---
 title: "Film Simple"
 output: 
-  rmarkdown::github_document
-    theme: united
-    highlight: tango
+  github_document:
+    toc: true
+    toc_depth: 2
+
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+    #theme: united
+    #highlight: tango
 ```
 
 #### Load Libraries, function scripts and data

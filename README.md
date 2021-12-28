@@ -1,4 +1,4 @@
-Film Simple
+Film Networks
 ================
 
 #### Load Libraries, function scripts and data
@@ -258,7 +258,7 @@ ggplot(sents_df, aes(x = decade, n_sents)) +
   theme_linedraw() + ylab('no. of sentences')
 ```
 
-![](Title_files/figure-gfm/unnamed-chunk-9-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.jpeg)<!-- -->
 
 ``` r
 #plot number of words per sentence across decades
@@ -279,7 +279,7 @@ ggplot(words_df, aes(x = decade, wordspsents)) +
   theme_linedraw() + ylab('words per sentence')
 ```
 
-![](Title_files/figure-gfm/unnamed-chunk-9-2.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-2.jpeg)<!-- -->
 
 ``` r
 set.seed(42) #for replication
@@ -458,7 +458,7 @@ g_demo = graph_demo[[1]]
 visIgraph(g_demo)
 ```
 
-![](Title_files/figure-gfm/unnamed-chunk-12-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.jpeg)<!-- -->
 
 ### Complete Graph
 
@@ -470,7 +470,7 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
  visIgraph(g) #%>% visNodes(font = list(size = 26))  #display
 ```
 
-![](Title_files/figure-gfm/unnamed-chunk-13-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.jpeg)<!-- -->
 
 ### Significant Tropes in the Network
 
@@ -566,7 +566,7 @@ fprimary_tropes = female_ps
  visIgraph(g)
 ```
 
-![](Title_files/figure-gfm/unnamed-chunk-14-1.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.jpeg)<!-- -->
 
 ``` r
  #all_edges$V3[malet_bool]
@@ -591,4 +591,4 @@ fprimary_tropes = female_ps
  visIgraph(g_trim) %>% visNodes(font = list(size = 26))
 ```
 
-![](Title_files/figure-gfm/unnamed-chunk-14-2.jpeg)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-2.jpeg)<!-- -->

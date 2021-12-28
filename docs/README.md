@@ -474,10 +474,20 @@ graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all))
 ``` r
 g_demo = graph_demo[[1]]
 #visIgraph(g_demo)
-plot(g_demo)
+plot(g_demo, vertex.label = NA, edge.curved=FALSE)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-12-1.jpeg)<!-- -->
+
+``` r
+#tkplot(g_demo)
+#coords_demo <- tkplot.getcoords(1)
+#save(coords_demo, file = 'coords_demo.RData')
+load(file= 'coords_demo.RData')
+plot(g_demo, vertex.label.cex = 0.6, edge.curved=FALSE, layout = coords_demo)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-12-2.jpeg)<!-- -->
 
 ## Complete Graph
 

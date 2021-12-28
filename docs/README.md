@@ -18,6 +18,7 @@ Film Networks
     -   [Complete Graph](#complete-graph)
     -   [Significant Tropes in the
         Network](#significant-tropes-in-the-network)
+    -   [Common Roles](#common-roles)
 
 # The dataset
 
@@ -291,7 +292,7 @@ for(i in seq(1940, 2010, 10)){
 
 words_df$wordspsents = words_df$n_words/sents_df$n_sents
 
-ggplot(words_df, aes(x = decade, wordspsents)) +
+ggplot(words_df, aes(x = decade, y = wordspsents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
   theme_linedraw() + ylab('words per sentence')
@@ -484,6 +485,10 @@ plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0,
 
 ![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
+``` r
+# log chart vertical of 21 words
+```
+
 ## Complete Graph
 
 ``` r
@@ -498,7 +503,7 @@ plot(g, vertex.size = 3, vertex.label = NA,
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ## Significant Tropes in the Network
 
@@ -609,7 +614,7 @@ fprimary_tropes = female_ps
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
  keep_nodes = names(c(allc, male_primary, female_primary))
@@ -624,4 +629,49 @@ fprimary_tropes = female_ps
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
+
+## Common Roles
+
+``` r
+graph = grapherdemo(21, token_filter3('noun', 1940, 2020, token.all))
+female_primary = graph[[2]] #20 female primary nodes
+male_primary = graph[[3]] #20 male primary nodes
+g = graph[[1]] #save graph as g
+
+male_primary = male_primary[names(male_primary) != 'female/characters']
+male_primary = male_primary[1:20]
+male_np = data.frame(word = names(male_primary), llr = male_primary)
+male_np$gender = 'male'
+
+ggplot(male_np, aes(x = reorder(word, llr), y = llr)) +
+  geom_bar(stat = 'identity', fill = 'deepskyblue4', 
+           alpha = 0.7, color = 'black') + coord_flip() +
+           xlab('word') + ylab('loglikelihood ratio')
+```
+
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+female_primary = female_primary[names(female_primary) != 'male/characters']
+female_primary = female_primary[1:20]
+female_np = data.frame(word = names(female_primary), llr = female_primary)
+female_np$gender = 'female'
+
+ggplot(female_np, aes(x = reorder(word, llr), y = llr)) +
+  geom_bar(stat = 'identity', fill = 'darkorange3', 
+           alpha = 0.7, color = 'black') + coord_flip() +
+           xlab('word') + ylab('loglikelihood ratio')
+```
+
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+``` r
+#ll_np = rbind(male_np, female_np)
+
+# ggplot(all_np, aes(x = reorder(word, llr), y = llr)) +
+#   geom_bar(stat = 'identity', aes(fill = gender), 
+#            alpha = 0.7, color = 'black') + coord_flip() +
+#            xlab('word') + ylab('loglikelihood ratio') +
+#   facet_wrap(~ gender)
+```

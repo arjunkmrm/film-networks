@@ -23,6 +23,7 @@ library(igraph) #for creating graphs
 library(visNetwork) #for visualizing graphs
 library(gridExtra)
 library(gtable)
+library(wordcloud)
 
 source("calculatecoocstats.R") #calculate co-occurrence statistics
 source("grapher.R") #create graph
@@ -589,7 +590,8 @@ mn = ggplot(male_np, aes(x = reorder(word, llr), y = llr)) +
            xlab('word') + ylab('loglikelihood ratio') + ylim(0, ylimit) +
            theme_linedraw() + theme(axis.title.x=element_blank(),
                               axis.text.x=element_blank(),
-                              axis.ticks.x=element_blank())
+                              axis.ticks.x=element_blank()) +
+        ggtitle('Male')
 
 female_primary = female_primary[names(female_primary) != 'male/characters']
 female_primary = female_primary[1:20]
@@ -600,7 +602,11 @@ fn = ggplot(female_np, aes(x = reorder(word, -llr), y = llr)) +
   geom_bar(stat = 'identity', fill = 'darkorange3', 
            alpha = 0.7, color = 'black') + coord_flip() +
            xlab('word') + ylab('loglikelihood ratio') + theme_linedraw() +
-  ylim(0, ylimit)
+  ylim(0, ylimit) + ggtitle('Female')
+
+par(mfrow=c(1,2))
+wordcloud(words = male_np$word, freq = male_np$llr, colors = 'darkorange3')
+wordcloud(words = female_np$word, freq = male_np$llr, colors = 'deepskyblue3')
 
 grid.arrange(mn, fn)
 }

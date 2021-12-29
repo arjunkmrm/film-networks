@@ -675,3 +675,7 @@ ggplot(female_np, aes(x = reorder(word, llr), y = llr)) +
 #            xlab('word') + ylab('loglikelihood ratio') +
 #   facet_wrap(~ gender)
 ```
+
+``` r
+#to do: general function for word classes, fix igraphs
+```

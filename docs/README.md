@@ -16,9 +16,13 @@ Film Networks
         tokenised
         text](#function-to-create-co-occurence-network-using-a-given-set-of-tokenised-text)
     -   [Complete Graph](#complete-graph)
-    -   [Significant Tropes in the
-        Network](#significant-tropes-in-the-network)
-    -   [Common Roles](#common-roles)
+-   [Significant Character Tropes](#significant-character-tropes)
+-   [Most Common Roles, Actions and
+    Descriptions](#most-common-roles-actions-and-descriptions)
+    -   [Common Roles - Nouns](#common-roles---nouns)
+    -   [Common Descriptions -
+        Adjectives](#common-descriptions---adjectives)
+-   [Change across decades](#change-across-decades)
 
 # The dataset
 
@@ -508,7 +512,7 @@ plot(g, vertex.size = 3, vertex.label = NA,
 
 ![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
-## Significant Tropes in the Network
+# Significant Character Tropes
 
 ``` r
 #Top secondary co-occurences
@@ -639,7 +643,7 @@ fprimary_tropes = female_ps
 
 ![](README_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
-## Common Roles
+# Most Common Roles, Actions and Descriptions
 
 ``` r
 ll_bar <- function(pos = 'noun', n = 21, ylimit = 1800){
@@ -681,6 +685,8 @@ grid.arrange(mn, fn)
 }
 ```
 
+## Common Roles - Nouns
+
 ``` r
 ll_bar('noun')
 ```
@@ -695,6 +701,7 @@ ll_bar('noun')
     ## "deepskyblue3"): sister/noun could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
+## Common Actions - Verbs
 
 ``` r
 ll_bar('verb', ylimit = 700)
@@ -708,6 +715,8 @@ ll_bar('verb', ylimit = 700)
 
 ![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
+## Common Descriptions - Adjectives
+
 ``` r
 ll_bar('adj', ylimit = 400)
 ```
@@ -716,3 +725,41 @@ ll_bar('adj', ylimit = 400)
     ## "deepskyblue3"): pregnant/adj could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
+
+# Change across decades
+
+``` r
+plot_word_single <- function(term, gender){
+  male = data.frame()
+  for(i in 0 : 7){ #for loop to run across decades
+    male_temp <- data.frame()
+    j = 1940 + 10*i
+    male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+    #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+    male_temp <- male_temp %>% filter(names == term) #filter term given
+    male_temp$year = j #attach year info
+    male_temp$gender = "male" #assign gender
+    names(male_temp)[2] = 'll'
+    male_ind = male_temp
+    male = rbind(male, male_ind)
+  }
+  male = male %>% select(year, ll)
+  
+  #plot 
+  ggplot(male, aes(x = year, y = ll)) +
+    geom_point(color = "black") + 
+    geom_line(size = 1) +
+    geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
+    ylab("Loglikelihood") + ggtitle(paste(gender, term, sep = '-')) +
+    theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
+          legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)) 
+  #facet_wrap(~ gender)
+}
+
+plot_word_single('kill/verb', 'male')
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->

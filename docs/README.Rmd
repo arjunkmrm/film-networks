@@ -468,7 +468,7 @@ plot(g, vertex.size = 3, vertex.label = NA,
 ```
 
 
-## Significant Tropes in the Network
+# Significant Character Tropes 
 
 ```{r, fig.width = 6, fig.height = 6, dpi= 400}
 
@@ -569,7 +569,7 @@ fprimary_tropes = female_ps
 
 ```
 
-## Common Roles
+# Most Common Roles, Actions and Descriptions
 
 ```{r, fig.width = 7, fig.height = 7, dpi= 300}
 
@@ -614,11 +614,14 @@ grid.arrange(mn, fn)
 
 ```
 
+## Common Roles - Nouns
+
 ```{r, fig.width = 7, fig.height = 7, dpi= 300}
 
 ll_bar('noun')
 
 ```
+## Common Actions - Verbs
 
 ```{r, fig.width = 7, fig.height = 7, dpi= 300}
 
@@ -626,8 +629,46 @@ ll_bar('verb', ylimit = 700)
 
 ```
 
+## Common Descriptions - Adjectives
+
 ```{r, fig.width = 7, fig.height = 7, dpi= 300}
 
 ll_bar('adj', ylimit = 400)
+
+```
+
+# Change across decades
+
+```{r}
+
+plot_word_single <- function(term, gender){
+  male = data.frame()
+  for(i in 0 : 7){ #for loop to run across decades
+    male_temp <- data.frame()
+    j = 1940 + 10*i
+    male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+    #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+    male_temp <- male_temp %>% filter(names == term) #filter term given
+    male_temp$year = j #attach year info
+    male_temp$gender = "male" #assign gender
+    names(male_temp)[2] = 'll'
+    male_ind = male_temp
+    male = rbind(male, male_ind)
+  }
+  male = male %>% select(year, ll)
+  
+  #plot 
+  ggplot(male, aes(x = year, y = ll)) +
+    geom_point(color = "black") + 
+    geom_line(size = 1) +
+    geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
+    ylab("Loglikelihood") + ggtitle(paste(gender, term, sep = '-')) +
+    theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
+          legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)) 
+  #facet_wrap(~ gender)
+}
+
+plot_word_single('kill/verb', 'male')
 
 ```

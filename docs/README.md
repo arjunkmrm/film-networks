@@ -594,7 +594,7 @@ fprimary_tropes = female_ps
                               
                               ifelse(male.sec_bool == TRUE, V(g)$color[edge.start],
                                      ifelse(female.sec_bool == TRUE, V(g)$color[edge.start],       
-                                            adjustcolor('grey', alpha=0.4)))))
+                                            adjustcolor('grey', alpha=0.2)))))
  
  #visIgraph(g)
  #all_edges$V3[malet_bool]
@@ -605,7 +605,7 @@ fprimary_tropes = female_ps
                                     ifelse(V(g)$name %in% mprimary_tropes, adjustcolor('cornflowerblue', alpha = 0.9),
                                            ifelse(V(g)$name %in% fprimary_tropes, adjustcolor('orange', alpha = 0.9),
                                                   ifelse(V(g)$name %in% c(names(male_c), names(female_c)), adjustcolor('darkgrey', alpha = 0.9),
-                                                         adjustcolor('grey', alpha = 0.1)))))))
+                                                         adjustcolor('grey', alpha = 0.2)))))))
  
  #V(g)$color <- when(V(g)$name %in% 'male/character', adjustcolor('red', alpha = 0.8))
  #visIgraph(g)

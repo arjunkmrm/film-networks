@@ -450,7 +450,7 @@ plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0,
 
 ## Complete Graph
 
-```{r, fig.width = 4, fig.height = 3, dpi= 400}
+```{r, fig.width = 6, fig.height = 6, dpi= 400}
 
 graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create graph
  female_primary = graph[[2]] #20 female primary nodes
@@ -467,7 +467,7 @@ plot(g, vertex.size = 3, vertex.label = NA,
 
 ## Significant Tropes in the Network
 
-```{r, fig.width = 4, fig.height = 3, dpi= 400}
+```{r, fig.width = 6, fig.height = 6, dpi= 400}
 
 #Top secondary co-occurences
  #male
@@ -528,7 +528,7 @@ fprimary_tropes = female_ps
                               
                               ifelse(male.sec_bool == TRUE, V(g)$color[edge.start],
                                      ifelse(female.sec_bool == TRUE, V(g)$color[edge.start],       
-                                            adjustcolor('grey', alpha=0.4)))))
+                                            adjustcolor('grey', alpha=0.2)))))
  
  #visIgraph(g)
  #all_edges$V3[malet_bool]
@@ -539,7 +539,7 @@ fprimary_tropes = female_ps
                                     ifelse(V(g)$name %in% mprimary_tropes, adjustcolor('cornflowerblue', alpha = 0.9),
                                            ifelse(V(g)$name %in% fprimary_tropes, adjustcolor('orange', alpha = 0.9),
                                                   ifelse(V(g)$name %in% c(names(male_c), names(female_c)), adjustcolor('darkgrey', alpha = 0.9),
-                                                         adjustcolor('grey', alpha = 0.1)))))))
+                                                         adjustcolor('grey', alpha = 0.2)))))))
  
  #V(g)$color <- when(V(g)$name %in% 'male/character', adjustcolor('red', alpha = 0.8))
  #visIgraph(g)

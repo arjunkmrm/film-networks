@@ -29,6 +29,8 @@ library(tidyverse)
 library(quanteda) #for text cleaning
 library(igraph) #for creating graphs
 library(visNetwork) #for visualizing graphs
+library(gridExtra)
+library(gtable)
 
 source("calculatecoocstats.R") #calculate co-occurrence statistics
 source("grapher.R") #create graph
@@ -499,7 +501,7 @@ graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create gra
  #visIgraph(g) #%>% visNodes(font = list(size = 26))  #display
  
 plot(g, vertex.size = 3, vertex.label = NA, 
-     vertex.label.dist = 0, 
+     vertex.label.dist = 0, vertex.frame.color = ifelse(V(g)$name %in% c(names(male_primary), names(female_primary), 'female/characters'), adjustcolor('black', alpha.f = 1), adjustcolor('darkgray', alpha.f = 0.2)),
      edge.curved=FALSE)
 ```
 
@@ -609,7 +611,12 @@ fprimary_tropes = female_ps
  
  #V(g)$color <- when(V(g)$name %in% 'male/character', adjustcolor('red', alpha = 0.8))
  #visIgraph(g)
- plot(g, vertex.size = 3, vertex.label = NA, 
+ plot(g, vertex.size = 3, vertex.label = NA,
+      vertex.frame.color = ifelse(V(g)$name %in% c(names(male_primary),
+                                                   names(female_primary), 
+                                                   'female/characters'), 
+                                  adjustcolor('black', alpha.f = 1), 
+                                  adjustcolor('darkgray', alpha.f = 0.2)),
      vertex.label.dist = 0, 
      edge.curved=FALSE)
 ```
@@ -634,48 +641,54 @@ fprimary_tropes = female_ps
 ## Common Roles
 
 ``` r
-graph = grapherdemo(21, token_filter3('noun', 1940, 2020, token.all))
+ll_bar <- function(pos = 'noun', n = 21, ylimit = 1800){
+graph = grapherdemo(21, token_filter3(pos, 1940, 2020, token.all))
 female_primary = graph[[2]] #20 female primary nodes
 male_primary = graph[[3]] #20 male primary nodes
 g = graph[[1]] #save graph as g
 
 male_primary = male_primary[names(male_primary) != 'female/characters']
-male_primary = male_primary[1:20]
+male_primary = male_primary[1:(n-1)]
 male_np = data.frame(word = names(male_primary), llr = male_primary)
 male_np$gender = 'male'
 
-ggplot(male_np, aes(x = reorder(word, llr), y = llr)) +
+mn = ggplot(male_np, aes(x = reorder(word, llr), y = llr)) +
   geom_bar(stat = 'identity', fill = 'deepskyblue4', 
            alpha = 0.7, color = 'black') + coord_flip() +
-           xlab('word') + ylab('loglikelihood ratio')
-```
+           xlab('word') + ylab('loglikelihood ratio') + ylim(0, ylimit) +
+           theme_linedraw() + theme(axis.title.x=element_blank(),
+                              axis.text.x=element_blank(),
+                              axis.ticks.x=element_blank())
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
-
-``` r
 female_primary = female_primary[names(female_primary) != 'male/characters']
 female_primary = female_primary[1:20]
 female_np = data.frame(word = names(female_primary), llr = female_primary)
 female_np$gender = 'female'
 
-ggplot(female_np, aes(x = reorder(word, llr), y = llr)) +
+fn = ggplot(female_np, aes(x = reorder(word, -llr), y = llr)) +
   geom_bar(stat = 'identity', fill = 'darkorange3', 
            alpha = 0.7, color = 'black') + coord_flip() +
-           xlab('word') + ylab('loglikelihood ratio') + theme_linedraw()
+           xlab('word') + ylab('loglikelihood ratio') + theme_linedraw() +
+  ylim(0, ylimit)
+
+grid.arrange(mn, fn)
+}
+```
+
+``` r
+ll_bar('noun')
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
-#ll_np = rbind(male_np, female_np)
-
-# ggplot(all_np, aes(x = reorder(word, llr), y = llr)) +
-#   geom_bar(stat = 'identity', aes(fill = gender), 
-#            alpha = 0.7, color = 'black') + coord_flip() +
-#            xlab('word') + ylab('loglikelihood ratio') +
-#   facet_wrap(~ gender)
+ll_bar('verb', ylimit = 700)
 ```
+
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
-#to do: general function for word classes, fix igraphs
+ll_bar('adj', ylimit = 400)
 ```
+
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->

@@ -1,5 +1,5 @@
 ---
-title: "Film Networks"
+title: "Analysing the Changing Gender Representations in American Films from a Network Perspective"
 output: 
   github_document:
     dev: png

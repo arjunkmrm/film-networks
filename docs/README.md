@@ -271,25 +271,12 @@ acrosst he decades.
 ``` r
 #plot number of movies across decades
 load('n_movies.Rdata')
-head(n_movies)
-```
+#head(n_movies)
 
-    ## # A tibble: 6 × 2
-    ## # Groups:   year [6]
-    ##    year     n
-    ##   <dbl> <int>
-    ## 1  1940  1352
-    ## 2  1950  1678
-    ## 3  1960  1501
-    ## 4  1970  1447
-    ## 5  1980  1671
-    ## 6  1990  1773
-
-``` r
 ggplot(n_movies, aes(x = as.factor(year), y = n)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('plots') + xlab('decade')
+  theme_linedraw() + ylab('no. of plots') + xlab('decade')
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -320,7 +307,7 @@ ggplot(n_movies, aes(x = as.factor(year), y = sents_per_plot)) +
 ggplot(sents_df, aes(x = decade, n_sents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('sentences')
+  theme_linedraw() + ylab('no. of sentences')
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->

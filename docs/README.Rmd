@@ -231,7 +231,16 @@ Since the data obtained is unequal for each decade due to some inherent factors,
 
 ```{r, message = FALSE}
 
-#plot the number of movies in each decade
+#plot number of movies across decades
+load('n_movies.Rdata')
+head(n_movies)
+
+ggplot(n_movies, aes(x = as.factor(year), y = n)) +
+  geom_bar(stat = 'identity', width = 0.5, color = 'black',
+           position = position_dodge(width = 0.4)) +
+  theme_linedraw() + ylab('plots') + xlab('decade')
+
+#average number of sentences per plot across decades
 sents_df = data.frame(decade = as.character(), 
                        n_sents = as.numeric())
 for(i in seq(1940, 2010, 10)){
@@ -241,10 +250,18 @@ for(i in seq(1940, 2010, 10)){
   sents_df = rbind(sents_df, sents_t)
 }
 
+n_movies$sents_per_plot <- sents_df$n_sents/n_movies$n
+
+ggplot(n_movies, aes(x = as.factor(year), y = sents_per_plot)) +
+  geom_bar(stat = 'identity', width = 0.5, color = 'black',
+           position = position_dodge(width = 0.4)) +
+  theme_linedraw() + ylab('sentences/plot') + xlab('decade')
+
+#plot the number of sentences in each decade
 ggplot(sents_df, aes(x = decade, n_sents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('no. of sentences')
+  theme_linedraw() + ylab('sentences')
 
 #plot number of words per sentence across decades
 words_df = data.frame(decade = as.character(), 
@@ -261,7 +278,7 @@ words_df$wordspsents = words_df$n_words/sents_df$n_sents
 ggplot(words_df, aes(x = decade, y = wordspsents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('words per sentence')
+  theme_linedraw() + ylab('words/sentence')
 
 ```
 

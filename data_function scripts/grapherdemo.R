@@ -1,5 +1,8 @@
 ##### function to create graphs #####
 #Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
+# numberOfCoocs = 21
+# toks = token.all
+# measure = 'LOGLIK'
 grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   #oppositeg = ifelse(coocTerm == 'male/characters', 'female/characters', 'male/characters')
   #coocTerm = 'male/characters'
@@ -90,7 +93,7 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   # Identification of all nodes with less than 2 edges
   verticesToRemove <- V(graphNetwork)[degree(graphNetwork) < 2]
   # These edges are removed from the graph
-  #graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
+  graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
   #imm.coocs
   
   #for vertices #####

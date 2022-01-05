@@ -622,8 +622,8 @@ fn = ggplot(female_np, aes(x = reorder(word, -llr), y = llr)) +
   ylim(0, ylimit) + ggtitle('Female')
 
 par(mfrow=c(1,2))
-wordcloud(words = male_np$word, freq = male_np$llr, colors = 'darkorange3')
-wordcloud(words = female_np$word, freq = male_np$llr, colors = 'deepskyblue3')
+wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
+wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
 
 grid.arrange(mn, fn)
 }

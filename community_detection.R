@@ -11,7 +11,7 @@ load("token.all.RData")
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
 token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
-#token.all <- token_filter2('all', 1980, 2020, token.all)
+token.all <- token_filter2('all', 2010, 2020, token.all)
 #select window of words around males and female characters
 #males
 # toks.male <- token.all %>% 
@@ -21,9 +21,10 @@ token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL,
 # toks.female <- token.all %>% 
 #   tokens_select(pattern = 'female/characters', selection = 'remove', padding = TRUE, window = 5)
 
-gender = 'male'
-nm = 10
+gender = 'female'
+nn = 20
 toks.all = token.all
+min = 20
 
 #DETECTING COMMUNITIES
 #gender = 'female'
@@ -35,12 +36,10 @@ detect_communities <- function(toks.all, gender = 'male', nn = 10, min = 20){
 dfm <-  toks %>% dfm() %>% dfm_trim(min_termfreq = min)
 filtered = colnames(dfm)
 toks <- token.all %>% 
-  tokens_select(pattern = filtered, selection = 'keep', padding = TRUE)
+  tokens_select(pattern = filtered, selection = 'keep', padding = FALSE)
 
 #feature co-occurrence matrix for males
-fcmat = fcm(toks, context = c("window"),
-                 count = c("weighted"), #words are weighted within the window
-                 window = 5)
+fcmat = fcm(toks, context = c("document"))
 
 #fcmat[1:2,1:2] #a small portion of the feature co-occurrence matrix
 
@@ -55,7 +54,7 @@ graph = simplify(graph, remove.loops = TRUE) #remove self-looping edges
 #louvian communities
 louvain <- cluster_louvain(graph, weights = E(graph)$weights)#detect communities 
 graph$community <- louvain$membership
-#unique(male_graph$community)
+nc = length(unique(graph$community))
 
 
 #most important word in each community
@@ -78,7 +77,7 @@ for (i in unique(graph$community)) {
 }
 
 communities = arrange(communities, desc(n_characters))
-top_comm <- communities$community[1:5]
+top_comm <- communities$community[1:nc]
 print(communities)
 
 #knitr::kable(communities %>%
@@ -97,8 +96,10 @@ for (i in top_comm) {
     # get degree
     degree <-  igraph::degree(subgraph)
     # get top ten degrees
+   
     top <- names(head(sort(degree, decreasing = TRUE), nn))
-    result <- data.frame(community = i, rank = 1:nn, word = top)
+    nrows = ifelse(nn > length(top), length(top), nn)
+    result <- data.frame(community = i, rank = 1:nrows, word = top)
  # } else {
  #   result <- data.frame(community = NULL, rank = NULL, character = NULL)
   #}
@@ -139,7 +140,7 @@ V(subgraph)$frame.color <- "white"
 #V(subgraph)$color <- subgraph$community
 V(subgraph)$color <- 'SkyBlue2'
 #V(male_subgraph)$label <- V(male_subgraph)$name
-V(subgraph)$label.cex <- 1.8
+V(subgraph)$label.cex <- 0.05
 V(subgraph)$label.color <- communityColors
 
 # also color edges according to their starting node
@@ -189,12 +190,12 @@ edge.weights <- function(community, network, weight.within = 100, weight.between
 E(subgraph)$weight <- edge.weights(clust_obj, subgraph)
 layout <- layout_with_fr(subgraph, weights=E(subgraph)$weight)
 #plot(subgraph, layout=layout, col = communityColors)
-plot(subgraph, layout=layout, edge.color = adjustcolor('SkyBlue2', alpha.f = 0.1))
+plot(subgraph, layout=layout, edge.color = adjustcolor('SkyBlue2', alpha.f = 0.2))
 #visIgraph(subgraph) %>% visIgraphLayout(layout = "layout_with_mds") %>% visNodes(size = 14)
 return(subgraph)
 }
 
-subgraph = detect_communities(token.all, 'male', 10, 20)
+subgraph = detect_communities(token.all, 'male', 20, 20)
 tkplot(subgraph)
 coords <- tkplot.getcoords(4)
 

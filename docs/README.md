@@ -704,8 +704,8 @@ fn = ggplot(female_np, aes(x = reorder(word, -llr), y = llr)) +
   ylim(0, ylimit) + ggtitle('Female')
 
 par(mfrow=c(1,2))
-wordcloud(words = male_np$word, freq = male_np$llr, colors = 'darkorange3')
-wordcloud(words = female_np$word, freq = male_np$llr, colors = 'deepskyblue3')
+wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
+wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
 
 grid.arrange(mn, fn)
 }
@@ -718,13 +718,13 @@ ll_bar('noun')
 ```
 
     ## Warning in wordcloud(words = male_np$word, freq = male_np$llr, colors =
-    ## "darkorange3"): friend/noun could not be fit on page. It will not be plotted.
+    ## "deepskyblue3"): friend/noun could not be fit on page. It will not be plotted.
 
     ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "deepskyblue3"): daughter/noun could not be fit on page. It will not be plotted.
+    ## "darkorange3"): daughter/noun could not be fit on page. It will not be plotted.
 
     ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "deepskyblue3"): sister/noun could not be fit on page. It will not be plotted.
+    ## "darkorange3"): sister/noun could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
 ## Common Actions - Verbs
@@ -734,10 +734,10 @@ ll_bar('verb', ylimit = 700)
 ```
 
     ## Warning in wordcloud(words = male_np$word, freq = male_np$llr, colors =
-    ## "darkorange3"): named/verb could not be fit on page. It will not be plotted.
+    ## "deepskyblue3"): named/verb could not be fit on page. It will not be plotted.
 
     ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "deepskyblue3"): meets/verb could not be fit on page. It will not be plotted.
+    ## "darkorange3"): meets/verb could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
@@ -748,7 +748,7 @@ ll_bar('adj', ylimit = 400)
 ```
 
     ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "deepskyblue3"): pregnant/adj could not be fit on page. It will not be plotted.
+    ## "darkorange3"): pregnant/adj could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
 

@@ -93,7 +93,7 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
   # Identification of all nodes with less than 2 edges
   verticesToRemove <- V(graphNetwork)[degree(graphNetwork) < 2]
   # These edges are removed from the graph
-  graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
+  #graphNetwork <- delete.vertices(graphNetwork, verticesToRemove) 
   #imm.coocs
   
   #for vertices #####

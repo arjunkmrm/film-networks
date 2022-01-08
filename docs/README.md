@@ -257,9 +257,12 @@ head(token.all, 5)
     ## [5] "landed/ADJ"      "gentlemen/NOUN"  "Male/CHARACTERS" "implied/VERB"
 
 ``` r
-#convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
 token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
+
+#sample based on min in a decade
+set.seed(42)
+token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
 ```
 
 # Exploratory analysis
@@ -332,13 +335,6 @@ ggplot(words_df, aes(x = decade, y = wordspsents)) +
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
-
-``` r
-set.seed(42) #for replication
-#UPDATE - general version
-#sample based on min in a decade
-token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
-```
 
 # Graph Construction
 
@@ -516,7 +512,13 @@ plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0,
      edge.curved=FALSE, layout = coords_demo)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+    ## Warning in layout[, 1] + label.dist * cos(-label.degree) * (vertex.size + :
+    ## longer object length is not a multiple of shorter object length
+
+    ## Warning in layout[, 2] + label.dist * sin(-label.degree) * (vertex.size + :
+    ## longer object length is not a multiple of shorter object length
+
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 # log chart vertical of 21 words
@@ -536,7 +538,7 @@ plot(g, vertex.size = 3, vertex.label = NA,
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 # Significant Character Tropes
 
@@ -564,14 +566,17 @@ plot(g, vertex.size = 3, vertex.label = NA,
  all_edges$V2[all_edges$V1 == 'female/characters']
 ```
 
-    ##  [1] "daughter/noun"     "sister/noun"       "love/noun"        
-    ##  [4] "mother/noun"       "husband/noun"      "relationship/noun"
-    ##  [7] "affair/noun"       "house/noun"        "marriage/noun"    
-    ## [10] "girl/noun"         "marry/verb"        "woman/noun"       
-    ## [13] "pregnant/adj"      "wedding/noun"      "married/verb"     
-    ## [16] "love/noun"         "mother/noun"       "relationship/noun"
-    ## [19] "affair/noun"       "marriage/noun"     "girl/noun"        
-    ## [22] "woman/noun"        "pregnant/adj"      "wedding/noun"
+    ##  [1] "love/noun"         "sister/noun"       "husband/noun"     
+    ##  [4] "mother/noun"       "relationship/noun" "boyfriend/noun"   
+    ##  [7] "marry/verb"        "affair/noun"       "girl/noun"        
+    ## [10] "marriage/noun"     "house/noun"        "woman/noun"       
+    ## [13] "married/verb"      "pregnant/adj"      "wedding/noun"     
+    ## [16] "married/adj"       "takes/verb"        "meet/verb"        
+    ## [19] "help/noun"         "learns/verb"       "daughter/noun"    
+    ## [22] "love/noun"         "mother/noun"       "affair/noun"      
+    ## [25] "girl/noun"         "marriage/noun"     "house/noun"       
+    ## [28] "woman/noun"        "pregnant/adj"      "wedding/noun"     
+    ## [31] "married/adj"
 
 ``` r
  #male_c = male_c[names(male_c != 'beach/noun')]
@@ -588,13 +593,13 @@ plot(g, vertex.size = 3, vertex.label = NA,
  all_edges$V1[female.sec_bool]
 ```
 
-    ##  [1] "friend/noun"       "friend/noun"       "is/verb"          
-    ##  [4] "is/verb"           "is/verb"           "kill/verb"        
-    ##  [7] "takes/verb"        "love/noun"         "love/noun"        
-    ## [10] "love/noun"         "love/noun"         "love/noun"        
+    ##  [1] "tells/verb"        "is/verb"           "is/verb"          
+    ##  [4] "is/verb"           "kill/verb"         "kill/verb"        
+    ##  [7] "kill/verb"         "kill/verb"         "kill/verb"        
+    ## [10] "takes/verb"        "love/noun"         "love/noun"        
     ## [13] "love/noun"         "love/noun"         "love/noun"        
-    ## [16] "relationship/noun" "relationship/noun" "relationship/noun"
-    ## [19] "wedding/noun"      "wedding/noun"      "wedding/noun"
+    ## [16] "love/noun"         "sister/noun"       "relationship/noun"
+    ## [19] "relationship/noun" "marriage/noun"     "wedding/noun"
 
 ``` r
  #color only primary tropes that have a path
@@ -652,7 +657,7 @@ fprimary_tropes = female_ps
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
  keep_nodes = names(c(allc, male_primary, female_primary))
@@ -667,7 +672,7 @@ fprimary_tropes = female_ps
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 # Most Common Roles, Actions and Descriptions
 
@@ -724,9 +729,12 @@ ll_bar('noun')
     ## "darkorange3"): daughter/noun could not be fit on page. It will not be plotted.
 
     ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
+    ## "darkorange3"): love/noun could not be fit on page. It will not be plotted.
+
+    ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
     ## "darkorange3"): sister/noun could not be fit on page. It will not be plotted.
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 ## Common Actions - Verbs
 
 ``` r
@@ -739,7 +747,7 @@ ll_bar('verb', ylimit = 700)
     ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
     ## "darkorange3"): meets/verb could not be fit on page. It will not be plotted.
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
 
 ## Common Descriptions - Adjectives
 
@@ -750,7 +758,7 @@ ll_bar('adj', ylimit = 400)
     ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
     ## "darkorange3"): pregnant/adj could not be fit on page. It will not be plotted.
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
 # Change across decades
 
@@ -788,4 +796,4 @@ plot_word_single('kill/verb', 'male')
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->

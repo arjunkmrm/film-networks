@@ -211,17 +211,20 @@ token.all <- film_tokenizer(s_all.i, s_docvars)
 A look at a sample of the final dataset
 
 ```{r}
+
 head(token.all, 5)
+
 ```
 
 
 ```{r}
 
-#convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
 token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
 
-
+#sample based on min in a decade
+set.seed(42)
+token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
 
 ```
 
@@ -279,16 +282,6 @@ ggplot(words_df, aes(x = decade, y = wordspsents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
   theme_linedraw() + ylab('words/sentence')
-
-```
-
-```{r, eval = FALSE}
-
-set.seed(42) #for replication
-#UPDATE - general version
-#sample based on min in a decade
-token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
-
 
 ```
 

@@ -251,7 +251,7 @@ male.perm <- data.frame() #initialize
  
  source('grapherdemo.R')
 sig_tropes <- function(decade){
- graph = grapherdemo(11, token_filter3('all', decade, decade+10, token.all)) #create graph
+ graph = grapherdemo(21, token_filter3('all', 1940, 2010, token.all)) #create graph
  #graph = grapher('male/characters', 21, token.all)
  female_primary = graph[[2]] #20 female primary nodes
  male_primary = graph[[3]] #20 male primary nodes
@@ -327,23 +327,41 @@ sig_tropes <- function(decade){
  names(top_male)[4] = 'llr'
  top_female$path = paste(top_female$start, top_female$mid, top_female$end, sep = '--')
  names(top_female)[4] = 'llr'
+ 
+ ##MALE######
+ #text cleaning remove '-'
+ top_male = top_male %>% separate(start, c('A', NA), sep='/') %>% 
+   separate(mid, c('B', NA), sep='/') %>% 
+   separate(end, c('C', NA), sep='/') 
+ top_male$path = paste(top_male$A, top_male$B, top_male$C, sep = '--')
 
- mtt = ggplot(top_male, aes(x = reorder(path, llr), y = llr)) +
-   geom_bar(stat = 'identity', fill = 'deepskyblue4', 
-            alpha = 0.7, color = 'black', width = 0.8) + coord_flip() +
-   xlab('word') + ylab('loglikelihood ratio') + theme_linedraw() +
-   ggtitle('Male')
+ mtt = ggplot(top_male, aes(y = reorder(path, llr), x = llr)) +
+   geom_point(color = 'deepskyblue') +
+   geom_segment(aes(x = 0, y = path, xend = llr, yend = path)) +
+   xlab('loglikelihood ratio') + ylab('word') + theme_linedraw() +
+   ggtitle('Male') #+ geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
+ mtt
+ #geom_bar(stat = 'identity', fill = 'deepskyblue4', 
+ #        alpha = 0.7, color = 'black', width = 0.8) 
+ #####FEMALE ######
+ #text cleaning remove '-'
+ top_female = top_female %>% separate(start, c('A', NA), sep='/') %>% 
+   separate(mid, c('B', NA), sep='/') %>% 
+   separate(end, c('C', NA), sep='/') 
+ top_female$path = paste(top_female$A, top_female$B, top_female$C, sep = '--')
  
- ftt = ggplot(top_female, aes(x = reorder(path, -llr), y = llr)) +
-   geom_bar(stat = 'identity', fill = 'darkorange3', 
-            alpha = 0.7, color = 'black', width = 0.8) + coord_flip() +
-   xlab('word') + ylab('loglikelihood ratio') + theme_linedraw() +
-   ggtitle('Female')
+ ftt = ggplot(top_female, aes(y = reorder(path, -llr), x = llr)) +
+   geom_point(color = 'darkorange') +
+   geom_segment(aes(x = 0, y = path, xend = llr, yend = path)) +
+   xlab('loglikelihood ratio') + ylab('word') + theme_linedraw() +
+   ggtitle('Female') # + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
+ ftt
+
  
- #mtt
- #ggsave('male_tropes.png', width = 8, height = 5)
- #ftt
- #ggsave('female_tropes.png', width = 8, height = 5)
+ mtt + xlim(0, 2000)
+ ggsave('male_tropes.png', width = 8, height = 5)
+ ftt
+ ggsave('female_tropes.png', width = 8, height = 5)
  ####################################### Network
  #COLORING THESE EDGES
  all_edges = ends(g, es = E(g), names = T) #store all edges

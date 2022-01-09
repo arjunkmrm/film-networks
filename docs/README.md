@@ -677,7 +677,7 @@ fprimary_tropes = female_ps
 # Most Common Roles, Actions and Descriptions
 
 ``` r
-ll_bar <- function(pos = 'noun', n = 21, ylimit = 1800){
+ll_bar <- function(pos = 'noun', n = 21, xlimit = 1800, yax = 'noun'){
 graph = grapherdemo(21, token_filter3(pos, 1940, 2020, token.all))
 female_primary = graph[[2]] #20 female primary nodes
 male_primary = graph[[3]] #20 male primary nodes
@@ -687,76 +687,55 @@ male_primary = male_primary[names(male_primary) != 'female/characters']
 male_primary = male_primary[1:(n-1)]
 male_np = data.frame(word = names(male_primary), llr = male_primary)
 male_np$gender = 'male'
+male_np <- male_np %>% separate(word, c('word', NA), sep = '/')
 
-mn = ggplot(male_np, aes(x = reorder(word, llr), y = llr)) +
-  geom_bar(stat = 'identity', fill = 'deepskyblue4', 
-           alpha = 0.7, color = 'black') + coord_flip() +
-           xlab('word') + ylab('loglikelihood ratio') + ylim(0, ylimit) +
-           theme_linedraw() + theme(axis.title.x=element_blank(),
-                              axis.text.x=element_blank(),
-                              axis.ticks.x=element_blank()) +
-        ggtitle('Male')
+mn = ggplot(male_np, aes(y = reorder(word, llr), x = llr)) +
+   geom_point(color = 'deepskyblue') +
+   geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
+   xlab('loglikelihood ratio') + ylab(yax) + theme_linedraw() +
+   ggtitle('Male') #+ ylim(0, 1200) # + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
 
 female_primary = female_primary[names(female_primary) != 'male/characters']
 female_primary = female_primary[1:20]
 female_np = data.frame(word = names(female_primary), llr = female_primary)
 female_np$gender = 'female'
 
-fn = ggplot(female_np, aes(x = reorder(word, -llr), y = llr)) +
-  geom_bar(stat = 'identity', fill = 'darkorange3', 
-           alpha = 0.7, color = 'black') + coord_flip() +
-           xlab('word') + ylab('loglikelihood ratio') + theme_linedraw() +
-  ylim(0, ylimit) + ggtitle('Female')
+female_np <- female_np %>% separate(word, c('word', NA), sep = '/')
+
+fn = ggplot(female_np, aes(y = reorder(word, -llr), x = llr)) +
+   geom_point(color = 'darkorange') +
+   geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
+   xlab('loglikelihood ratio') + ylab(yax) + theme_linedraw() +
+   ggtitle('Female') #+ ylim(0, 1200)# + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
 
 par(mfrow=c(1,2))
 wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
 wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
 
-grid.arrange(mn, fn)
+grid.arrange(mn + xlim(0, xlimit), fn + xlim(0, xlimit))
 }
 ```
 
 ## Common Roles - Nouns
 
 ``` r
-ll_bar('noun')
+ll_bar('noun', xlimit = 1075, yax = 'noun')
 ```
-
-    ## Warning in wordcloud(words = male_np$word, freq = male_np$llr, colors =
-    ## "deepskyblue3"): friend/noun could not be fit on page. It will not be plotted.
-
-    ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "darkorange3"): daughter/noun could not be fit on page. It will not be plotted.
-
-    ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "darkorange3"): love/noun could not be fit on page. It will not be plotted.
-
-    ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "darkorange3"): sister/noun could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 ## Common Actions - Verbs
 
 ``` r
-ll_bar('verb', ylimit = 700)
+ll_bar('verb', xlimit = 450, yax = 'verb')
 ```
-
-    ## Warning in wordcloud(words = male_np$word, freq = male_np$llr, colors =
-    ## "deepskyblue3"): named/verb could not be fit on page. It will not be plotted.
-
-    ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "darkorange3"): meets/verb could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
 
 ## Common Descriptions - Adjectives
 
 ``` r
-ll_bar('adj', ylimit = 400)
+ll_bar('adj', xlimit = 250, yax = 'adjective')
 ```
-
-    ## Warning in wordcloud(words = female_np$word, freq = male_np$llr, colors =
-    ## "darkorange3"): pregnant/adj could not be fit on page. It will not be plotted.
 
 ![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 

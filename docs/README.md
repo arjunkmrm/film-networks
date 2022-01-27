@@ -262,7 +262,7 @@ token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
 
 #sample based on min in a decade
 set.seed(42)
-token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
+#token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
 ```
 
 # Exploratory analysis
@@ -279,7 +279,10 @@ load('n_movies.Rdata')
 ggplot(n_movies, aes(x = as.factor(year), y = n)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('no. of plots') + xlab('decade')
+   ylab('no. of plots') + xlab('decade') +
+  geom_text(aes(label = n, vjust=-0.3), size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -300,7 +303,10 @@ n_movies$sents_per_plot <- sents_df$n_sents/n_movies$n
 ggplot(n_movies, aes(x = as.factor(year), y = sents_per_plot)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('sentences/plot') + xlab('decade')
+   ylab('sentences/plot') + xlab('decade') +
+  geom_text(aes(label = round(sents_per_plot, 2), vjust=-0.3), size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
@@ -310,7 +316,10 @@ ggplot(n_movies, aes(x = as.factor(year), y = sents_per_plot)) +
 ggplot(sents_df, aes(x = decade, n_sents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('no. of sentences')
+   ylab('no. of sentences') +
+  geom_text(aes(label = round(n_sents, 2), vjust=-0.3), size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
@@ -331,7 +340,10 @@ words_df$wordspsents = words_df$n_words/sents_df$n_sents
 ggplot(words_df, aes(x = decade, y = wordspsents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
            position = position_dodge(width = 0.4)) +
-  theme_linedraw() + ylab('words/sentence')
+  ylab('words/sentence') +
+  geom_text(aes(label = round(wordspsents, 2), vjust=-0.3), size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
@@ -512,12 +524,6 @@ plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0,
      edge.curved=FALSE, layout = coords_demo)
 ```
 
-    ## Warning in layout[, 1] + label.dist * cos(-label.degree) * (vertex.size + :
-    ## longer object length is not a multiple of shorter object length
-
-    ## Warning in layout[, 2] + label.dist * sin(-label.degree) * (vertex.size + :
-    ## longer object length is not a multiple of shorter object length
-
 ![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
@@ -566,17 +572,14 @@ plot(g, vertex.size = 3, vertex.label = NA,
  all_edges$V2[all_edges$V1 == 'female/characters']
 ```
 
-    ##  [1] "love/noun"         "sister/noun"       "husband/noun"     
-    ##  [4] "mother/noun"       "relationship/noun" "boyfriend/noun"   
-    ##  [7] "marry/verb"        "affair/noun"       "girl/noun"        
-    ## [10] "marriage/noun"     "house/noun"        "woman/noun"       
-    ## [13] "married/verb"      "pregnant/adj"      "wedding/noun"     
-    ## [16] "married/adj"       "takes/verb"        "meet/verb"        
-    ## [19] "help/noun"         "learns/verb"       "daughter/noun"    
-    ## [22] "love/noun"         "mother/noun"       "affair/noun"      
-    ## [25] "girl/noun"         "marriage/noun"     "house/noun"       
-    ## [28] "woman/noun"        "pregnant/adj"      "wedding/noun"     
-    ## [31] "married/adj"
+    ##  [1] "daughter/noun"     "sister/noun"       "love/noun"        
+    ##  [4] "mother/noun"       "husband/noun"      "relationship/noun"
+    ##  [7] "affair/noun"       "house/noun"        "marriage/noun"    
+    ## [10] "girl/noun"         "marry/verb"        "woman/noun"       
+    ## [13] "pregnant/adj"      "wedding/noun"      "married/verb"     
+    ## [16] "love/noun"         "mother/noun"       "relationship/noun"
+    ## [19] "affair/noun"       "marriage/noun"     "girl/noun"        
+    ## [22] "woman/noun"        "pregnant/adj"      "wedding/noun"
 
 ``` r
  #male_c = male_c[names(male_c != 'beach/noun')]
@@ -593,13 +596,13 @@ plot(g, vertex.size = 3, vertex.label = NA,
  all_edges$V1[female.sec_bool]
 ```
 
-    ##  [1] "tells/verb"        "is/verb"           "is/verb"          
-    ##  [4] "is/verb"           "kill/verb"         "kill/verb"        
-    ##  [7] "kill/verb"         "kill/verb"         "kill/verb"        
-    ## [10] "takes/verb"        "love/noun"         "love/noun"        
+    ##  [1] "friend/noun"       "friend/noun"       "is/verb"          
+    ##  [4] "is/verb"           "is/verb"           "kill/verb"        
+    ##  [7] "takes/verb"        "love/noun"         "love/noun"        
+    ## [10] "love/noun"         "love/noun"         "love/noun"        
     ## [13] "love/noun"         "love/noun"         "love/noun"        
-    ## [16] "love/noun"         "sister/noun"       "relationship/noun"
-    ## [19] "relationship/noun" "marriage/noun"     "wedding/noun"
+    ## [16] "relationship/noun" "relationship/noun" "relationship/noun"
+    ## [19] "wedding/noun"      "wedding/noun"      "wedding/noun"
 
 ``` r
  #color only primary tropes that have a path
@@ -677,7 +680,7 @@ fprimary_tropes = female_ps
 # Most Common Roles, Actions and Descriptions
 
 ``` r
-ll_bar <- function(pos = 'noun', n = 21, xlimit = 1800, yax = 'noun'){
+ll_bar_m <- function(pos = 'noun', n = 21, xlimit = 1800, yax = 'noun'){
 graph = grapherdemo(21, token_filter3(pos, 1940, 2020, token.all))
 female_primary = graph[[2]] #20 female primary nodes
 male_primary = graph[[3]] #20 male primary nodes
@@ -692,8 +695,10 @@ male_np <- male_np %>% separate(word, c('word', NA), sep = '/')
 mn = ggplot(male_np, aes(y = reorder(word, llr), x = llr)) +
    geom_point(color = 'deepskyblue') +
    geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
-   xlab('loglikelihood ratio') + ylab(yax) + theme_linedraw() +
-   ggtitle('Male') #+ ylim(0, 1200) # + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
+   xlab('loglikelihood ratio') + ylab(yax)  +
+   ggtitle('Male') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.line.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
 
 female_primary = female_primary[names(female_primary) != 'male/characters']
 female_primary = female_primary[1:20]
@@ -705,39 +710,143 @@ female_np <- female_np %>% separate(word, c('word', NA), sep = '/')
 fn = ggplot(female_np, aes(y = reorder(word, -llr), x = llr)) +
    geom_point(color = 'darkorange') +
    geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
-   xlab('loglikelihood ratio') + ylab(yax) + theme_linedraw() +
-   ggtitle('Female') #+ ylim(0, 1200)# + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
+   xlab('loglikelihood ratio') + ylab(yax) +
+   ggtitle('Female') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
 
 par(mfrow=c(1,2))
 wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
 wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
 
-grid.arrange(mn + xlim(0, xlimit), fn + xlim(0, xlimit))
+mn + xlim(0, xlimit)
+#fn + xlim(0, xlimit)
+}
+
+ll_bar_f <- function(pos = 'noun', n = 21, xlimit = 1800, yax = 'noun'){
+graph = grapherdemo(21, token_filter3(pos, 1940, 2020, token.all))
+female_primary = graph[[2]] #20 female primary nodes
+male_primary = graph[[3]] #20 male primary nodes
+g = graph[[1]] #save graph as g
+
+male_primary = male_primary[names(male_primary) != 'female/characters']
+male_primary = male_primary[1:(n-1)]
+male_np = data.frame(word = names(male_primary), llr = male_primary)
+male_np$gender = 'male'
+male_np <- male_np %>% separate(word, c('word', NA), sep = '/')
+
+mn = ggplot(male_np, aes(y = reorder(word, llr), x = llr)) +
+   geom_point(color = 'deepskyblue') +
+   geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
+   xlab('loglikelihood ratio') + ylab(yax)  +
+   ggtitle('Male') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.line.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
+
+female_primary = female_primary[names(female_primary) != 'male/characters']
+female_primary = female_primary[1:20]
+female_np = data.frame(word = names(female_primary), llr = female_primary)
+female_np$gender = 'female'
+
+female_np <- female_np %>% separate(word, c('word', NA), sep = '/')
+
+fn = ggplot(female_np, aes(y = reorder(word, -llr), x = llr)) +
+   geom_point(color = 'darkorange') +
+   geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
+   xlab('loglikelihood ratio') + ylab(yax) +
+   ggtitle('Female') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
+
+par(mfrow=c(1,2))
+wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
+wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
+
+#mn + xlim(0, xlimit)
+fn + xlim(0, xlimit)
 }
 ```
 
 ## Common Roles - Nouns
 
 ``` r
-ll_bar('noun', xlimit = 1075, yax = 'noun')
+ll_bar_m('noun', xlimit = 1075, yax = 'noun')
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
-## Common Actions - Verbs
 
 ``` r
-ll_bar('verb', xlimit = 450, yax = 'verb')
+ll_bar_f('noun', xlimit = 1075, yax = 'noun')
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-3.png)<!-- -->
+
+    ## Warning: Removed 2 rows containing missing values (geom_point).
+
+    ## Warning: Removed 2 rows containing missing values (geom_segment).
+
+    ## Warning: Removed 2 rows containing missing values (geom_text).
+
+![](README_files/figure-gfm/unnamed-chunk-16-4.png)<!-- --> ## Common
+Actions - Verbs
+
+``` r
+ll_bar_m('verb', xlimit = 450, yax = 'verb')
+```
+
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+    ## Warning: Removed 1 rows containing missing values (geom_point).
+
+    ## Warning: Removed 1 rows containing missing values (geom_segment).
+
+    ## Warning: Removed 1 rows containing missing values (geom_text).
+
+![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
+
+``` r
+ll_bar_f('verb', xlimit = 450, yax = 'verb')
+```
+
+![](README_files/figure-gfm/unnamed-chunk-17-3.png)<!-- -->
+
+    ## Warning: Removed 1 rows containing missing values (geom_point).
+
+    ## Warning: Removed 1 rows containing missing values (geom_segment).
+
+    ## Warning: Removed 1 rows containing missing values (geom_text).
+
+![](README_files/figure-gfm/unnamed-chunk-17-4.png)<!-- -->
 
 ## Common Descriptions - Adjectives
 
 ``` r
-ll_bar('adj', xlimit = 250, yax = 'adjective')
+ll_bar_m('adj', xlimit = 250, yax = 'adjective')
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+    ## Warning: Removed 1 rows containing missing values (geom_point).
+
+    ## Warning: Removed 1 rows containing missing values (geom_segment).
+
+    ## Warning: Removed 1 rows containing missing values (geom_text).
+
+![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+
+``` r
+ll_bar_f('adj', xlimit = 250, yax = 'adjective')
+```
+
+![](README_files/figure-gfm/unnamed-chunk-18-3.png)<!-- -->
+
+    ## Warning: Removed 2 rows containing missing values (geom_point).
+
+    ## Warning: Removed 2 rows containing missing values (geom_segment).
+
+    ## Warning: Removed 2 rows containing missing values (geom_text).
+
+![](README_files/figure-gfm/unnamed-chunk-18-4.png)<!-- -->
 
 # Change across decades
 

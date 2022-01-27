@@ -77,18 +77,36 @@ label1 = paste('R^2 == ', R2, sep = '')
 label2 = paste('p == ', p, sep = '')
 label1
 label2
+
+#remove '-'
+term1 = str_split(term1, '/')[[1]][1]
+term2 = str_split(term2, '/')[[1]][1]
+
 #plot 
 ggplot(male, aes(x = year, y = ll)) +
   geom_point(color = "black") + 
   geom_line(size = 1) +
-  geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
-  ylab("Loglikelihood Ratio") + ggtitle(paste(gender, term1, term2, sep = '-')) +
+  geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) +
+  ylab("Loglikelihood Ratio") + ggtitle(paste(gender, term1, term2, sep = '--')) +
   theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
         legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
         ) +
-  annotate('text', label = label1, x = 1950, y = 150, parse = TRUE) +
-  annotate('text', label = label2, x = 1950, y = 125, parse = TRUE)
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line('black'))
+ 
   #facet_wrap(~ gender)
+
+#check significance
+ancova.word <- lm(ll~year, data = male)
+est = summary(ancova.word)[[4]][2]
+R2 = round(summary(ancova.word)[[8]], 2)
+p = round(anova(ancova.word)[[5]][1], 2)
+label1 = paste('R^2 == ', R2, sep = '')
+label2 = paste('p == ', p, sep = '')
+print(term)
+print(label1)
+print(label2)
+print(round(est, 2))
 
 #panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)
 }
@@ -97,8 +115,8 @@ ggplot(male, aes(x = year, y = ll)) +
 #  annotate('text', label = label1, x = 1950, y = 150, parse = TRUE) +
 #  annotate('text', label = label2, x = 1950, y = 125, parse = TRUE)
 
-plot_word('relationship/noun', 'romantic/adj', 'female')
-ggsave("relationship_romantic.png", width = 6, height = 4)
+plot_word('agent/noun', 'government/noun', 'male')
+ggsave("love_fall.png", width = 6, height = 4)
 
 #check significance
 ancova.word <- lm(loglik~year*gender, data = all_ind)
@@ -112,7 +130,8 @@ summary(ancova.word)
 anova(ancova.word) 
 
 ######### Individual words ############
-
+term = 'kill/verb'
+gender = 'male'
 plot_word_single <- function(term, gender){
   male = data.frame()
   for(i in 0 : 7){ #for loop to run across decades
@@ -131,6 +150,7 @@ plot_word_single <- function(term, gender){
   
   #check significance
   ancova.word <- lm(ll~year, data = male)
+  est = summary(ancova.word)[[4]][2]
   R2 = round(summary(ancova.word)[[8]], 2)
   p = round(anova(ancova.word)[[5]][1], 2)
   label1 = paste('R^2 == ', R2, sep = '')
@@ -138,6 +158,11 @@ plot_word_single <- function(term, gender){
   print(term)
   print(label1)
   print(label2)
+  print(round(est, 2))
+  
+  #remove '/'
+  term = str_split(term, '/')[[1]][1]
+  
   #plot 
   ggplot(male, aes(x = year, y = ll)) +
     geom_point(color = "black") + 
@@ -146,29 +171,36 @@ plot_word_single <- function(term, gender){
     ylab("Loglikelihood Ratio") + ggtitle(term) +
     theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
           legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
-    ) #+
+    ) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank(), axis.line = element_line('black'))
+  
+    #+
     #annotate('text', label = label1, x = 1950, y = 75, parse = TRUE) +
     #annotate('text', label = label2, x = 1950, y = 65, parse = TRUE)
 }
 
 #write a loop for saving multiple plots
-male_noun <- c('agent/noun', 'boss/noun', 'murder/noun', 'leader/noun', 'office/noun', 
-               'attorney/noun', 'fight/noun', 'owner/noun', 'assistant/noun')
+male_noun <- c('agent/noun', 'boss/noun', 'attorney/noun', 'manager/noun', 'owner/noun', 'office/noun',
+               'death/noun', 'murder/noun', 'gun/noun')
 female_noun <- c('love/noun', 'girlfriend/noun', 'wife/noun', 'relationship/noun', 'affair/noun', 
-                 'marriage/noun', 'wedding/noun', 'date/noun')
+                 'marriage/noun', 'wedding/noun', 'widow/noun', 'crush/noun')
 
 
-male_verb <- c('kill/verb', 'led/verb', 'confronts/verb')
+male_verb <- c('kill/verb')
 female_verb <- c('marry/verb', 'dating/verb', 'attracted/verb', 'loves/verb')
 
-male_adj <- c('wealthy/adj', 'best/adj', 'corrupt/adj', 'suspicious/adj', 'criminal/adj')
-female_adj <- c('pregnant/adj', 'married/adj', 'beautiful/adj', 'romantic/adj', 'attractive/adj')
+male_adj <- c('corrupt/adj', 'suspicious/adj')
+female_adj <- c('pregnant/adj', 'married/adj', 'beautiful/adj', 'romantic/adj', 'attractive/adj', 'sexual/adj',
+                'wife/adj', 'large/adj')
 
-for(i in female_adj){
-plot_word_single(i, 'female')
+for(i in male_adj){
+plot_word_single(i, 'male')
 ggsave(paste(str_split(i, '/')[[1]][1], '.png', sep=''), width = 6, height = 4)
 }
 
+plot_word_single('large/adj', 'female')
+ggsave('large_adj.png', width = 6, height = 4)
 
 
 ############################################################
@@ -338,8 +370,10 @@ sig_tropes <- function(decade){
  mtt = ggplot(top_male, aes(y = reorder(path, llr), x = llr)) +
    geom_point(color = 'deepskyblue') +
    geom_segment(aes(x = 0, y = path, xend = llr, yend = path)) +
-   xlab('loglikelihood ratio') + ylab('word') + theme_linedraw() +
-   ggtitle('Male') #+ geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
+   xlab('loglikelihood ratio') + ylab('word')  +
+   ggtitle('Male') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line = element_line('black'))
  mtt
  #geom_bar(stat = 'identity', fill = 'deepskyblue4', 
  #        alpha = 0.7, color = 'black', width = 0.8) 
@@ -353,14 +387,16 @@ sig_tropes <- function(decade){
  ftt = ggplot(top_female, aes(y = reorder(path, -llr), x = llr)) +
    geom_point(color = 'darkorange') +
    geom_segment(aes(x = 0, y = path, xend = llr, yend = path)) +
-   xlab('loglikelihood ratio') + ylab('word') + theme_linedraw() +
-   ggtitle('Female') # + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 2) #+ coord_flip() 
+   xlab('loglikelihood ratio') + ylab('word') + 
+   ggtitle('Female') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line.x = element_blank(), axis.line.y = element_line('black'))
  ftt
 
  
- mtt + xlim(0, 2000)
+ mtt + xlim(0, 2100) + ylab('network path') + theme(axis.line.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
  ggsave('male_tropes.png', width = 8, height = 5)
- ftt
+ ftt + xlim(0, 2100) + ylab('network path') + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
  ggsave('female_tropes.png', width = 8, height = 5)
  ####################################### Network
  #COLORING THESE EDGES

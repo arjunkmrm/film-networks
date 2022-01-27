@@ -1,3 +1,6 @@
+citation("spacyr")
+
+
 ##### function to create graphs #####
 #Wiedemann, Gregor; Niekler, Andreas (2017): Hands-on: A five day text mining course for humanists and social scientists in R. Proceedings of the 1st Workshop on Teaching NLP for Digital Humanities (Teach4DH@GSCL 2017), Berlin.
 # numberOfCoocs = 21

@@ -6,12 +6,18 @@ library(igraph) #for creating graphs
 library(visNetwork) #for visualizing graphs
 
 source("token_filter.R") #filter tokens
+
 #load tokens, get it ready for analysis
 load("token.all.RData")
 #convert tokens to all lower
 token.all <- tokens_tolower(token.all) #convert all tokens to lower
+token.all = token.all %>% tokens_remove(c('ex/adj', 'ex/noun'))
+
+#sample based on min in a decade
+set.seed(42)
 token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL, by = decade)
-token.all <- token_filter2('all', 2010, 2020, token.all)
+
+#token.all <- token_filter2('all', 2010, 2020, token.all)
 #select window of words around males and female characters
 #males
 # toks.male <- token.all %>% 
@@ -56,7 +62,10 @@ louvain <- cluster_louvain(graph, weights = E(graph)$weights)#detect communities
 graph$community <- louvain$membership
 nc = length(unique(graph$community))
 
-
+print('vertices')
+print(gorder(graph))
+print('edges')
+print(gsize(graph))
 #most important word in each community
 communities <- data.frame()
 
@@ -195,7 +204,8 @@ plot(subgraph, layout=layout, edge.color = adjustcolor('SkyBlue2', alpha.f = 0.2
 return(subgraph)
 }
 
-subgraph = detect_communities(token.all, 'male', 20, 20)
+subgraph = detect_communities(token.all, 'female', 20, 20)
+gorder(subgraph)
 tkplot(subgraph)
 coords <- tkplot.getcoords(4)
 

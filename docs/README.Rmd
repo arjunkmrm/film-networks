@@ -1,12 +1,12 @@
 ---
-title: "Analysing the Changing Gender Representations in American Films from a Network Perspective"
+title: "Analysing Gender Representations in American Films from a Network Perspective"
 output: 
   github_document:
     dev: png
     toc: true
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
     #theme: united
     #highlight: tango
@@ -673,9 +673,9 @@ fn = ggplot(female_np, aes(y = reorder(word, -llr), x = llr)) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
 
-par(mfrow=c(1,2))
-wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
-wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
+# par(mfrow=c(1,2))
+# wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
+# wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
 
 #mn + xlim(0, xlimit)
 fn + xlim(0, xlimit)
@@ -685,33 +685,36 @@ fn + xlim(0, xlimit)
 
 ## Common Roles - Nouns
 
-```{r, fig.width = 8, fig.height = 5, dpi= 300}
-
+```{r, fig.width = 8, fig.height = 5, dpi= 300, echo=FALSE, warning=FALSE}
 ll_bar_m('noun', xlimit = 1075, yax = 'noun')
-ll_bar_f('noun', xlimit = 1075, yax = 'noun')
+```
 
+```{r, fig.width = 8, fig.height = 5, dpi= 300, echo=FALSE, warning=FALSE}
+ll_bar_f('noun', xlimit = 1075, yax = 'noun')
 ```
 ## Common Actions - Verbs
 
-```{r, fig.width = 8, fig.height = 5, dpi= 300}
-
+```{r, fig.width = 8, fig.height = 5, dpi= 300, echo=FALSE, warning=FALSE}
 ll_bar_m('verb', xlimit = 450, yax = 'verb')
-ll_bar_f('verb', xlimit = 450, yax = 'verb')
+```
 
+```{r, fig.width = 8, fig.height = 5, dpi= 300, echo=FALSE, warning=FALSE}
+ll_bar_f('verb', xlimit = 450, yax = 'verb')
 ```
 
 ## Common Descriptions - Adjectives
 
-```{r, fig.width = 8, fig.height = 5, dpi= 300}
-
+```{r, fig.width = 8, fig.height = 5, dpi= 300, echo=FALSE, warning=FALSE}
 ll_bar_m('adj', xlimit = 250, yax = 'adjective')
-ll_bar_f('adj', xlimit = 250, yax = 'adjective')
-
 ```
 
-# Change across decades
+```{r, fig.width = 8, fig.height = 5, dpi= 300, echo=FALSE, warning=FALSE}
+ll_bar_f('adj', xlimit = 250, yax = 'adjective')
+```
 
-```{r}
+
+
+```{r, eval=FALSE, echo=FALSE}
 
 plot_word_single <- function(term, gender){
   male = data.frame()

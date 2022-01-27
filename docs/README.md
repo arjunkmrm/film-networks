@@ -23,7 +23,6 @@ Network Perspective
     -   [Common Roles - Nouns](#common-roles---nouns)
     -   [Common Descriptions -
         Adjectives](#common-descriptions---adjectives)
--   [Change across decades](#change-across-decades)
 
 # The dataset
 
@@ -758,9 +757,9 @@ fn = ggplot(female_np, aes(y = reorder(word, -llr), x = llr)) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
 
-par(mfrow=c(1,2))
-wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
-wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
+# par(mfrow=c(1,2))
+# wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
+# wordcloud(words = female_np$word, freq = male_np$llr, colors = 'darkorange3')
 
 #mn + xlim(0, xlimit)
 fn + xlim(0, xlimit)
@@ -769,119 +768,17 @@ fn + xlim(0, xlimit)
 
 ## Common Roles - Nouns
 
-``` r
-ll_bar_m('noun', xlimit = 1075, yax = 'noun')
-```
-
 ![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
-``` r
-ll_bar_f('noun', xlimit = 1075, yax = 'noun')
-```
-
-![](README_files/figure-gfm/unnamed-chunk-16-3.png)<!-- -->
-
-    ## Warning: Removed 2 rows containing missing values (geom_point).
-
-    ## Warning: Removed 2 rows containing missing values (geom_segment).
-
-    ## Warning: Removed 2 rows containing missing values (geom_text).
-
-![](README_files/figure-gfm/unnamed-chunk-16-4.png)<!-- --> ## Common
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- --> ## Common
 Actions - Verbs
 
-``` r
-ll_bar_m('verb', xlimit = 450, yax = 'verb')
-```
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
-
-    ## Warning: Removed 1 rows containing missing values (geom_point).
-
-    ## Warning: Removed 1 rows containing missing values (geom_segment).
-
-    ## Warning: Removed 1 rows containing missing values (geom_text).
-
-![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
-
-``` r
-ll_bar_f('verb', xlimit = 450, yax = 'verb')
-```
-
-![](README_files/figure-gfm/unnamed-chunk-17-3.png)<!-- -->
-
-    ## Warning: Removed 1 rows containing missing values (geom_point).
-
-    ## Warning: Removed 1 rows containing missing values (geom_segment).
-
-    ## Warning: Removed 1 rows containing missing values (geom_text).
-
-![](README_files/figure-gfm/unnamed-chunk-17-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ## Common Descriptions - Adjectives
 
-``` r
-ll_bar_m('adj', xlimit = 250, yax = 'adjective')
-```
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
-
-    ## Warning: Removed 1 rows containing missing values (geom_point).
-
-    ## Warning: Removed 1 rows containing missing values (geom_segment).
-
-    ## Warning: Removed 1 rows containing missing values (geom_text).
-
-![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
-
-``` r
-ll_bar_f('adj', xlimit = 250, yax = 'adjective')
-```
-
-![](README_files/figure-gfm/unnamed-chunk-18-3.png)<!-- -->
-
-    ## Warning: Removed 2 rows containing missing values (geom_point).
-
-    ## Warning: Removed 2 rows containing missing values (geom_segment).
-
-    ## Warning: Removed 2 rows containing missing values (geom_text).
-
-![](README_files/figure-gfm/unnamed-chunk-18-4.png)<!-- -->
-
-# Change across decades
-
-``` r
-plot_word_single <- function(term, gender){
-  male = data.frame()
-  for(i in 0 : 7){ #for loop to run across decades
-    male_temp <- data.frame()
-    j = 1940 + 10*i
-    male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
-    #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
-    male_temp <- male_temp %>% filter(names == term) #filter term given
-    male_temp$year = j #attach year info
-    male_temp$gender = "male" #assign gender
-    names(male_temp)[2] = 'll'
-    male_ind = male_temp
-    male = rbind(male, male_ind)
-  }
-  male = male %>% select(year, ll)
-  
-  #plot 
-  ggplot(male, aes(x = year, y = ll)) +
-    geom_point(color = "black") + 
-    geom_line(size = 1) +
-    geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
-    ylab("Loglikelihood") + ggtitle(paste(gender, term, sep = '-')) +
-    theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
-          legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
-          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)) 
-  #facet_wrap(~ gender)
-}
-
-plot_word_single('kill/verb', 'male')
-```
-
-    ## `geom_smooth()` using formula 'y ~ x'
-
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->

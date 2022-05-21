@@ -31,10 +31,10 @@ token.all = tokens_sample(token.all, size = 22638, replace = FALSE, prob = NULL,
   
 #2. double words - PPMI across decades 
 i = 0
-gender = 'female'
-term1 = 'marriage/noun'
-term2 = 'proposal/noun'
-plot_word <- function(term1, term2, gender){
+gender = 'male'
+term1 = 'kill/verb'
+term2 = 'attempts/verb'
+plot_doubleword <- function(term1, term2, gender){
 male = data.frame()
 for(i in 0 : 7){ #for loop to run across decades
   male_temp <- data.frame()
@@ -51,7 +51,12 @@ for(i in 0 : 7){ #for loop to run across decades
   male_temp = grapher(term1, 10, token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
   male_temp <- male_temp %>% filter(names == term2) #filter term given
   names(male_temp)[2] = 'll2'
-  male_temp$names = ifelse(is.na(male_temp$names), 'term2', male_temp$names)
+  
+  if(dim(male_temp)[1] == 0){
+  male_temp[1, ] <- c(term2, as.numeric(0))
+  }
+  
+  #male_temp$names = ifelse(is.na(male_temp$names), 'term2', male_temp$names)
   male_ind = cbind(male_temp, male_ind)
   male = rbind(male, male_ind)
   # #same for females
@@ -66,6 +71,7 @@ for(i in 0 : 7){ #for loop to run across decades
   #all_ind <- ifelse(gender == 'male', rbind(all_ind, male_ind), 
              #       rbind(all_ind, male_ind))
 }
+male$ll2 = as.numeric(male$ll2)
 male$ll = male$ll1 + male$ll2
 male = male %>% select(year, ll)
 
@@ -115,7 +121,7 @@ print(round(est, 2))
 #  annotate('text', label = label1, x = 1950, y = 150, parse = TRUE) +
 #  annotate('text', label = label2, x = 1950, y = 125, parse = TRUE)
 
-plot_word('agent/noun', 'government/noun', 'male')
+plot_doubleword('love/noun', 'fall/verb', 'female')
 ggsave("love_fall.png", width = 6, height = 4)
 
 #check significance
@@ -130,7 +136,7 @@ summary(ancova.word)
 anova(ancova.word) 
 
 ######### Individual words ############
-term = 'kill/verb'
+term = 'handsome/adj'
 gender = 'male'
 plot_word_single <- function(term, gender){
   male = data.frame()
@@ -140,6 +146,9 @@ plot_word_single <- function(term, gender){
     male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
     #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
     male_temp <- male_temp %>% filter(names == term) #filter term given
+    if(dim(male_temp)[1] == 0){
+      male_temp[1, ] <- c(term, as.numeric(1))
+    }
     male_temp$year = j #attach year info
     male_temp$gender = "male" #assign gender
     names(male_temp)[2] = 'll'
@@ -186,11 +195,12 @@ male_noun <- c('agent/noun', 'boss/noun', 'attorney/noun', 'manager/noun', 'owne
 female_noun <- c('love/noun', 'girlfriend/noun', 'wife/noun', 'relationship/noun', 'affair/noun', 
                  'marriage/noun', 'wedding/noun', 'widow/noun', 'crush/noun')
 
+new <- c('married/adj', 'handsome/adj')
 
 male_verb <- c('kill/verb')
 female_verb <- c('marry/verb', 'dating/verb', 'attracted/verb', 'loves/verb')
 
-male_adj <- c('corrupt/adj', 'suspicious/adj')
+male_adj <- c('handsome/adj')
 female_adj <- c('pregnant/adj', 'married/adj', 'beautiful/adj', 'romantic/adj', 'attractive/adj', 'sexual/adj',
                 'wife/adj', 'large/adj')
 
@@ -209,10 +219,10 @@ ggsave('large_adj.png', width = 6, height = 4)
 library(wordcloud)
 #male
 male.perm <- data.frame() #initialize
-  #graph.m = grapher("male/characters", 20, token_filter2("noun", 1940, 2020, token.all)) #extract graph info
-  graph.m = grapher("male/characters", 20, token.all) 
+  graph.m = grapher("female/characters", 20, token_filter3("adj", 1940, 2020, token.all)) #extract graph info
+  #graph.m = grapher("male/characters", 20, token.all) 
   gr.m <- graph.m[[3]] #pass graph object
-  gr.m <- gr.m[gr.m$names != "female/characters",] #filter out female characters
+  gr.m <- gr.m[gr.m$names != "male/characters",] #filter out female characters
   gr.m <- gr.m[1:22,] #filter 20 
   gr.m$rank = 1 : nrow(gr.m) #rank
   gr.m$gender = "male" #assign gender
@@ -301,9 +311,9 @@ sig_tropes <- function(decade){
  # fmat = distances(graph[[1]], v=V(graph[[1]]), to='female/characters') #compute path weights
  # female_c = fmat[, 'female/characters'] #secondary to male
  # female_c = sort(female_c, decreasing = T)[1:20] #sort top 20
+}
  
- 
- 
+
 #######function to return top most significant tropes################################
  #find shortest paths in unweighted graph to all grey nodes
  #find grey nodes
@@ -384,7 +394,7 @@ sig_tropes <- function(decade){
    separate(end, c('C', NA), sep='/') 
  top_female$path = paste(top_female$A, top_female$B, top_female$C, sep = '--')
  
- ftt = ggplot(top_female, aes(y = reorder(path, -llr), x = llr)) +
+ ftt = ggplot(top_female, aes(y = reorder(path, llr), x = llr)) +
    geom_point(color = 'darkorange') +
    geom_segment(aes(x = 0, y = path, xend = llr, yend = path)) +
    xlab('loglikelihood ratio') + ylab('word') + 
@@ -394,11 +404,16 @@ sig_tropes <- function(decade){
  ftt
 
  
- mtt + xlim(0, 2100) + ylab('network path') + theme(axis.line.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
- ggsave('male_tropes.png', width = 8, height = 5)
- ftt + xlim(0, 2100) + ylab('network path') + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
- ggsave('female_tropes.png', width = 8, height = 5)
- ####################################### Network
+ mtt + xlim(0, 2400) + ylab('network path') + theme(axis.line.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
+ ggsave('male_tropes.png', width = 10, height = 5)
+ ftt + xlim(0, 2400) + ylab('network path') + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
+ ggsave('female_tropes.png', width = 10, height = 5)
+
+ 
+ 
+ 
+ 
+  ####################################### Network
  #COLORING THESE EDGES
  all_edges = ends(g, es = E(g), names = T) #store all edges
  all_edges = as.data.frame(all_edges) #convert to dataframe

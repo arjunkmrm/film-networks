@@ -1,5 +1,5 @@
-Analysing the Changing Gender Representations in American Films from a
-Network Perspective
+Analysing Gender Representations in American Films from a Network
+Perspective
 ================
 
 -   [The dataset](#the-dataset)
@@ -18,11 +18,15 @@ Network Perspective
         text](#function-to-create-co-occurence-network-using-a-given-set-of-tokenised-text)
     -   [Complete Graph](#complete-graph)
 -   [Significant Character Tropes](#significant-character-tropes)
+    -   [Change across decades](#change-across-decades)
+        -   [Example plot](#example-plot)
 -   [Most Common Roles, Actions and
     Descriptions](#most-common-roles-actions-and-descriptions)
     -   [Common Roles - Nouns](#common-roles---nouns)
     -   [Common Descriptions -
         Adjectives](#common-descriptions---adjectives)
+    -   [Change across decades](#change-across-decades-1)
+        -   [Example plot](#example-plot-1)
 
 # The dataset
 
@@ -273,7 +277,7 @@ acrosst he decades.
 ``` r
 #plot number of movies across decades
 load('n_movies.Rdata')
-#head(n_movies)
+head(n_movies)
 
 ggplot(n_movies, aes(x = as.factor(year), y = n)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
@@ -282,11 +286,7 @@ ggplot(n_movies, aes(x = as.factor(year), y = n)) +
   geom_text(aes(label = n, vjust=-0.3), size = 3) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
-```
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
-
-``` r
 #average number of sentences per plot across decades
 sents_df = data.frame(decade = as.character(), 
                        n_sents = as.numeric())
@@ -306,11 +306,7 @@ ggplot(n_movies, aes(x = as.factor(year), y = sents_per_plot)) +
   geom_text(aes(label = round(sents_per_plot, 2), vjust=-0.3), size = 3) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
-```
 
-![](README_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
-
-``` r
 #plot the number of sentences in each decade
 ggplot(sents_df, aes(x = decade, n_sents)) +
   geom_bar(stat = 'identity', width = 0.5, color = 'black',
@@ -319,11 +315,7 @@ ggplot(sents_df, aes(x = decade, n_sents)) +
   geom_text(aes(label = round(n_sents, 2), vjust=-0.3), size = 3) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
-```
 
-![](README_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
-
-``` r
 #plot number of words per sentence across decades
 words_df = data.frame(decade = as.character(), 
                        n_words = as.numeric())
@@ -344,8 +336,6 @@ ggplot(words_df, aes(x = decade, y = wordspsents)) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line = element_line('black'), axis.line.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
 ```
-
-![](README_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
 
 # Graph Construction
 
@@ -501,6 +491,20 @@ grapherdemo <- function(numberOfCoocs, toks, measure = "LOGLIK"){
 ``` r
 #add shiny toggle secondary, shiny toggle nodes
 graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all)) 
+g_demo = graph_demo[[1]]
+
+#tkplot(g_demo) #GUI to adjust coordinates of vertices
+#coords_demo <- tkplot.getcoords(1) #save coordinates to an object
+#save(coords_demo, file = 'coords_demo.RData') #save object
+load(file= 'coords_demo.RData')
+plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0, 
+     edge.curved=FALSE, layout = coords_demo)
+```
+
+## Complete Graph
+
+``` r
+graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create graph
 ```
 
     ## Loading required package: Matrix
@@ -513,26 +517,6 @@ graph_demo = grapherdemo(5, token_filter3('all', 1940, 2020, token.all))
     ##     expand, pack, unpack
 
 ``` r
-g_demo = graph_demo[[1]]
-
-#tkplot(g_demo) #GUI to adjust coordinates of vertices
-#coords_demo <- tkplot.getcoords(1) #save coordinates to an object
-#save(coords_demo, file = 'coords_demo.RData') #save object
-load(file= 'coords_demo.RData')
-plot(g_demo, vertex.label.cex = 0.6, vertex.label.dist = 0, 
-     edge.curved=FALSE, layout = coords_demo)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
-
-``` r
-# log chart vertical of 21 words
-```
-
-## Complete Graph
-
-``` r
-graph = grapherdemo(21, token_filter3('all', 1940, 2020, token.all)) #create graph
  female_primary = graph[[2]] #20 female primary nodes
  male_primary = graph[[3]] #20 male primary nodes
  g = graph[[1]] #save graph as g
@@ -543,7 +527,7 @@ plot(g, vertex.size = 3, vertex.label = NA,
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 # Significant Character Tropes
 
@@ -659,7 +643,7 @@ fprimary_tropes = female_ps
      edge.curved=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
  keep_nodes = names(c(allc, male_primary, female_primary))
@@ -674,7 +658,212 @@ fprimary_tropes = female_ps
      edge.curved=FALSE)
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-13-2.png)<!-- --> # Path
+weights of most significant trope associated with each primary
+association
+
+``` r
+source('grapherdemo.R')
+
+#function to return top most significant tropes
+ #find shortest paths in unweighted graph to all grey nodes
+ #find grey nodes
+ top_trope <- function(gender = 'male/characters'){
+ all_secondary = V(g)$name[!V(g)$name %in% c(names(male_primary), names(female_primary))]
+ all_secondary = all_secondary[!all_secondary %in% c('male/characters', 'female/characters')]
+ filter =  ifelse(gender == 'male/characters', 'female/characters', 'male/characters')
+ #find all shortest paths
+ a = shortest_paths(
+   g,
+   from = gender,
+   to = all_secondary,
+   weights = NA
+ )
+ 
+ l = data.frame()
+ 
+ #filter paths that go through females
+ for(i in 1:length(a$vpath)){
+ l_temp = data.frame(start = (a$vpath[[i]]$name)[1], mid = (a$vpath[[i]]$name)[2], end = (a$vpath[[i]]$name)[3])
+ l = rbind(l, l_temp)
+ }
+ 
+ l = l %>% filter(mid != filter)
+ 
+ #find weights of all these paths
+ 
+ for(i in 1:nrow(l)){
+ l[i, 4] = sum(E(g, path = c(l[i,1], l[i,2], l[i,3]))$weight)
+ }
+ #head(l)
+ l = arrange(l, desc(V4))
+ l <- distinct(l)
+ return(l)
+}
+
+ 
+ ## clean up text
+ 
+ top_male = top_trope('male/characters')
+ top_female = top_trope('female/characters')
+ 
+ top_male <- top_male %>% filter(mid %in% names(male_primary))
+ top_female <- top_female %>% filter(mid %in% names(female_primary))
+ 
+ top_male <- top_male %>% group_by(mid) %>% slice(which.max(V4))
+ top_female <- top_female %>% group_by(mid) %>% slice(which.max(V4))
+
+ top_male <- arrange(top_male, desc(V4))
+ top_female <- arrange(top_female, desc(V4))[1:20,]
+ 
+ ####### stacked bar plot of paths ######################
+ top_male$path = paste(top_male$start, top_male$mid, top_male$end, sep = '--')
+ names(top_male)[4] = 'llr'
+ top_female$path = paste(top_female$start, top_female$mid, top_female$end, sep = '--')
+ names(top_female)[4] = 'llr'
+ 
+ ##MALE######
+ #text cleaning remove '-'
+ top_male = top_male %>% separate(start, c('A', NA), sep='/') %>% 
+   separate(mid, c('B', NA), sep='/') %>% 
+   separate(end, c('C', NA), sep='/') 
+ top_male$path = paste(top_male$A, top_male$B, top_male$C, sep = '--')
+
+ mtt = ggplot(top_male, aes(y = reorder(path, llr), x = llr)) +
+   geom_point(color = 'deepskyblue') +
+   geom_segment(aes(x = 0, y = path, xend = llr, yend = path)) +
+   xlab('loglikelihood ratio') + ylab('word')  +
+   ggtitle('Male') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line = element_line('black'))
+ #mtt
+ #geom_bar(stat = 'identity', fill = 'deepskyblue4', 
+ #        alpha = 0.7, color = 'black', width = 0.8) 
+ #####FEMALE ######
+ #text cleaning remove '-'
+ top_female = top_female %>% separate(start, c('A', NA), sep='/') %>% 
+   separate(mid, c('B', NA), sep='/') %>% 
+   separate(end, c('C', NA), sep='/') 
+ top_female$path = paste(top_female$A, top_female$B, top_female$C, sep = '--')
+ 
+ ftt = ggplot(top_female, aes(y = reorder(path, llr), x = llr)) +
+   geom_point(color = 'darkorange') +
+   geom_segment(aes(x = 0, y = path, xend = llr, yend = path)) +
+   xlab('loglikelihood ratio') + ylab('word') + 
+   ggtitle('Female') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+         panel.background = element_blank(), axis.line.x = element_blank(), axis.line.y = element_line('black'))
+ #ftt
+
+ 
+ mtt + xlim(0, 2400) + ylab('network path') + theme(axis.line.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
+```
+
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
+ #ggsave('male_tropes.png', width = 10, height = 5)
+ ftt + xlim(0, 2400) + ylab('network path') + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
+```
+
 ![](README_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+
+``` r
+ #ggsave('female_tropes.png', width = 10, height = 5)
+```
+
+## Change across decades
+
+``` r
+plot_doubleword <- function(term1, term2, gender){
+male = data.frame()
+for(i in 0 : 7){ #for loop to run across decades
+  male_temp <- data.frame()
+  j = 1940 + 10*i
+
+  male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+  #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+  male_temp <- male_temp %>% filter(names == term1) #filter term given
+  male_temp$year = j #attach year info
+  male_temp$gender = "male" #assign gender
+  names(male_temp)[2] = 'll1'
+  male_ind = male_temp
+  
+  male_temp = grapher(term1, 10, token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+  male_temp <- male_temp %>% filter(names == term2) #filter term given
+  names(male_temp)[2] = 'll2'
+  
+  if(dim(male_temp)[1] == 0){
+  male_temp[1, ] <- c(term2, as.numeric(0))
+  }
+  
+  male_ind = cbind(male_temp, male_ind)
+  male = rbind(male, male_ind)
+}
+
+male$ll2 = as.numeric(male$ll2)
+male$ll = male$ll1 + male$ll2
+male = male %>% select(year, ll)
+
+#check significance
+ancova.word <- lm(ll~year, data = male)
+R2 = round(summary(ancova.word)[[8]], 2)
+p = round(anova(ancova.word)[[5]][1], 2)
+label1 = paste('R^2 == ', R2, sep = '')
+label2 = paste('p == ', p, sep = '')
+label1
+label2
+
+#remove '-'
+term1 = str_split(term1, '/')[[1]][1]
+term2 = str_split(term2, '/')[[1]][1]
+
+
+#plot 
+trend_plot = ggplot(male, aes(x = year, y = ll)) +
+  geom_point(color = "black") + 
+  geom_line(size = 1) +
+  geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) +
+  ylab("Loglikelihood Ratio") + ggtitle(paste(gender, term1, term2, sep = '--')) +
+  theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
+        legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
+        ) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line('black'))
+ 
+  #facet_wrap(~ gender)
+
+#check significance
+ancova.word <- lm(ll~year, data = male)
+est = summary(ancova.word)[[4]][2]
+R2 = round(summary(ancova.word)[[8]], 2)
+p = round(anova(ancova.word)[[5]][1], 2)
+label1 = paste('R^2 == ', R2, sep = '')
+label2 = paste('p == ', p, sep = '')
+#print(term)
+print(label1)
+print(label2)
+print(round(est, 2))
+
+#panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)
+
+trend_plot
+}
+```
+
+### Example plot
+
+``` r
+plot_doubleword('love/noun', 'falls/verb', 'female')
+```
+
+    ## [1] "R^2 == 0.37"
+    ## [1] "p == 0.11"
+    ## [1] -2.58
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 # Most Common Roles, Actions and Descriptions
 
@@ -699,6 +888,8 @@ mn = ggplot(male_np, aes(y = reorder(word, llr), x = llr)) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.line.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
 
+ ggsave('male_adj_needle.png', width = 10, height = 5)
+
 female_primary = female_primary[names(female_primary) != 'male/characters']
 female_primary = female_primary[1:20]
 female_np = data.frame(word = names(female_primary), llr = female_primary)
@@ -706,7 +897,7 @@ female_np$gender = 'female'
 
 female_np <- female_np %>% separate(word, c('word', NA), sep = '/')
 
-fn = ggplot(female_np, aes(y = reorder(word, -llr), x = llr)) +
+fn = ggplot(female_np, aes(y = reorder(word, llr), x = llr)) +
    geom_point(color = 'darkorange') +
    geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
    xlab('loglikelihood ratio') + ylab(yax) +
@@ -749,13 +940,15 @@ female_np$gender = 'female'
 
 female_np <- female_np %>% separate(word, c('word', NA), sep = '/')
 
-fn = ggplot(female_np, aes(y = reorder(word, -llr), x = llr)) +
+fn = ggplot(female_np, aes(y = reorder(word, llr), x = llr)) +
    geom_point(color = 'darkorange') +
    geom_segment(aes(x = 0, y = word, xend = llr, yend = word)) +
    xlab('loglikelihood ratio') + ylab(yax) +
    ggtitle('Female') + geom_text(aes(label = round(llr, 2)), hjust=-0.3, size = 3) +
    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line.y = element_line('black')) + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
+
+ ggsave('female_adj_needle.png', width = 10, height = 5)
 
 # par(mfrow=c(1,2))
 # wordcloud(words = male_np$word, freq = male_np$llr, colors = 'deepskyblue3')
@@ -768,17 +961,59 @@ fn + xlim(0, xlimit)
 
 ## Common Roles - Nouns
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
-
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- --> ## Common
-Actions - Verbs
-
 ![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
-
-## Common Descriptions - Adjectives
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- --> ## Common
+Actions - Verbs
 
 ![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
 
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+## Common Descriptions - Adjectives
+
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+## Change across decades
+
+``` r
+plot_word_single <- function(term, gender){
+  male = data.frame()
+  for(i in 0 : 7){ #for loop to run across decades
+    male_temp <- data.frame()
+    j = 1940 + 10*i
+    male_temp = grapher(paste(gender,'/characters', sep=''), 10 , token_filter('all', j, token.all), "LOGLIK")[[3]][] #get PPMI data for given decade
+    #male_ind$rank = 1 : nrow(male_ind) #rank words - redundant
+    male_temp <- male_temp %>% filter(names == term) #filter term given
+    male_temp$year = j #attach year info
+    male_temp$gender = "male" #assign gender
+    names(male_temp)[2] = 'll'
+    male_ind = male_temp
+    male = rbind(male, male_ind)
+  }
+  male = male %>% select(year, ll)
+  
+  #plot 
+  ggplot(male, aes(x = year, y = ll)) +
+    geom_point(color = "black") + 
+    geom_line(size = 1) +
+    geom_smooth(method = "lm", se = TRUE, size = 1, alpha = 0.1) + theme_minimal() +
+    ylab("Loglikelihood") + ggtitle(paste(gender, term, sep = '-')) +
+    theme(axis.text = element_text(color = "black", size = 12), axis.title = element_text(color = "black", size = 14),
+          legend.text = element_text(color = "black", size = 12), legend.title = element_text(color = "black", size = 14),
+          panel.grid.major = element_line(colour = "grey50", size = 0.3), panel.grid.minor = element_line(colour = "grey50", size = 0.3)) 
+  #facet_wrap(~ gender)
+}
+```
+
+### Example plot
+
+``` r
+plot_word_single('kill/verb', 'male')
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
